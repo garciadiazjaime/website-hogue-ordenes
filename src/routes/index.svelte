@@ -1,34 +1,49 @@
 <script>
-	import successkid from 'images/successkid.jpg';
+	import { onMount } from 'svelte';
 	import readXlsxFile from 'read-excel-file'
 
 	let rows = []
-	$: orders = rows.map((row, index) => ({
-		baseId: row[1],
-		partId: row[4],
-		description: row[6],
-		status: row[7],
-		quantity: row[8],
-		desiredRIsDate: row[9],
-		desiredWantDate: row[10],
-		code: row[11],
-		index,
-	}))
+	let orders = []
+
+	onMount(async () => {
+		const data = localStorage.getItem('schedule');
+
+		if (data) {
+			orders = JSON.parse(data)
+		}
+	});
 
 	async function fileHandler(event) {
 		const response = await readXlsxFile(event.target.files[0], { sheet: 3 })
-		rows = response.slice(1)
+
+		orders = response.slice(1).map((row, index) => ({
+			baseId: row[1],
+			partId: row[4],
+			description: row[6],
+			status: row[7],
+			quantity: row[8],
+			desiredRIsDate: row[9],
+			desiredWantDate: row[10],
+			code: row[11],
+		}))
 
 		event.target.value = ''
 	}
 
 	function orderHandler(event, index) {
-		const position = parseInt(event.target.value)
+		const position = parseInt(event.target.value) - 1
 
-		const newRows = [ ...rows.slice(0, index), ...rows.slice(index + 1) ]
-		rows = [...newRows.slice(0, position-1), rows[index], ...newRows.slice(position-1)]
+		const newOrders = [ ...orders.slice(0, index), ...orders.slice(index + 1) ]
+		orders = [...newOrders.slice(0, position), orders[index], ...newOrders.slice(position)]
 
 		event.target.value = index + 1
+		document.querySelectorAll('table input')[position].focus()
+	}
+
+	async function saveHandler(event) {
+		localStorage.setItem('schedule', JSON.stringify(orders));
+
+		alert('Schedule saved')
 	}
 </script>
 
@@ -49,6 +64,10 @@
 		border-collapse: collapse;
 	}
 
+	th {
+		text-align: left;
+	}
+
 	td {
 		border-bottom: 1px solid black;
 		padding: 6px;
@@ -64,12 +83,13 @@
 </style>
 
 <svelte:head>
-	<title>Programación de Producción | Hogue</title>
+	<title>Workload Schedule | Hogue</title>
 </svelte:head>
 
-<h1>Programación de Producción</h1>
+<h1>Workload Schedule</h1>
 
 <input type="file" on:change={fileHandler}>
+<input type="submit" value="Save" on:click={saveHandler}>
 
 <table>
 	<tr>
