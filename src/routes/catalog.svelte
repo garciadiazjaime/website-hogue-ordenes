@@ -26,7 +26,7 @@
 		event.target.value = ''
 	}
 
-	async function saveHandler(event) {
+	function saveHandler(event) {
 		localStorage.setItem('catalog', JSON.stringify(parts));
 
 		alert('Catalog saved')
