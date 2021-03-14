@@ -7,8 +7,8 @@
 	let catalog
 
 	let startDate = new Date().toLocaleDateString()
-	let hoursPerDay = 8
-	let shiftStartTime = new Date().toLocaleTimeString()
+	let hourPerShift = 8
+	let shiftStartTime = '08:00:00 AM'
 
 	onMount(async () => {
 		let data = localStorage.getItem('schedule');
@@ -58,7 +58,7 @@
 	}
 
 	function generateSchedule() {
-		if (!startDate || !hoursPerDay || !shiftStartTime) {
+		if (!startDate || !hourPerShift || !shiftStartTime) {
 			return alert('Plese fill in all the inputs.')
 		}
 
@@ -67,25 +67,42 @@
 		}
 
 		console.log(catalog)
+		
+		const firstDate = new Date(`${startDate} ${shiftStartTime}`)
 
 		orders = orders.map((order, index) => {
 			const part = catalog[0]
-			const duration = part.pieces * part.time
-			console.log(`[${index+1}] pieces: ${part.pieces}, time: ${part.time}, duration: ${duration}, setup: ${part.setup}`)
+			const duration = part.time * part.pieces // order.quantity
+
+			console.log(`--- ${index+1}:${order.partId} --- \npieces: ${part.pieces}\ntime: ${part.time}\nduration: ${duration}\nsetup: ${part.setup}\nquantity: ${order.quantity}`)
 
 			if (index === 0) {
-				order.desiredRIsDate = new Date(`${startDate} ${shiftStartTime}`)
-
-				order.desiredWantDate = new Date(order.desiredRIsDate)
-				order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + duration * 60)
-
+				order.desiredRIsDate = new Date(firstDate)
 			} 
 			else {
 				order.desiredRIsDate = new Date(orders[index - 1].desiredWantDate)
 				order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
+			}
+
+			order.desiredWantDate = new Date(order.desiredRIsDate)
+			order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + duration * 60)
+
+
+			const shiftEndTime = new Date(order.desiredRIsDate)
+			shiftEndTime.setHours(firstDate.getHours() + hourPerShift)
+			shiftEndTime.setMinutes(firstDate.getMinutes())
+			shiftEndTime.setSeconds(firstDate.getSeconds())
+
+			if (order.desiredWantDate.getTime() > shiftEndTime.getTime()) {
+				order.desiredRIsDate.setDate(order.desiredRIsDate.getDate() + 1)
+				order.desiredRIsDate.setHours(firstDate.getHours())
+				order.desiredRIsDate.setMinutes(firstDate.getMinutes())
+				order.desiredRIsDate.setSeconds(firstDate.getSeconds())
 
 				order.desiredWantDate = new Date(order.desiredRIsDate)
 				order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + duration * 60)
+
+				order.newDay = true
 			}
 
 			return order
@@ -126,6 +143,18 @@
 		padding: 6px;
 		font-size: 1.1em;
 	}
+
+	input[type=submit] {
+		min-width: 240px;
+	}
+
+	.orders input[type=text] {
+		width: 60px;
+	}
+
+	.new-day {
+		border-top: #868585 solid 6px;
+	}
 </style>
 
 <svelte:head>
@@ -142,11 +171,11 @@
 		<td><input type="text" bind:value={startDate}></td>
 	</tr>
 	<tr>
-		<th>Hours per Day</th>
-		<td><input type="text" bind:value={hoursPerDay}></td>
+		<th>Shift hours</th>
+		<td><input type="text" bind:value={hourPerShift}></td>
 	</tr>
 	<tr>
-		<th>Shift Start Time</th>
+		<th>Start Time</th>
 		<td><input type="text" bind:value={shiftStartTime}></td>
 	</tr>
 	<tr>
@@ -158,7 +187,9 @@
 	</tr>
 </table>
 
-<table>
+<br />
+
+<table class="orders">
 	<tr>
 		<th>#</th>
 		<th>Base ID</th>
@@ -171,7 +202,7 @@
 		<th>Commodity Code</th>
 	</tr>
 	{#each orders as order, index}
-		<tr>
+		<tr class:new-day={order.newDay}>
 			<td><input type="text" value={index+1} on:change={event => orderHandler(event, index)}></td>
 			<td>{order.baseId}</td>
 			<td>{order.partId}</td>
