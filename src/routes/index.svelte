@@ -12,9 +12,12 @@
 
 	onMount(async () => {
 		const schedule = localStorage.getItem('schedule');
-
 		if (schedule) {
-			orders = JSON.parse(schedule)
+			orders = JSON.parse(schedule).map(item => ({
+				...item,
+				desiredRIsDate: item.desiredRIsDate ? new Date(item.desiredRIsDate): '',
+				desiredWantDate: item.desiredWantDate ? new Date(item.desiredWantDate) : '',
+			}))
 		}
 
 		const data = localStorage.getItem('catalog')
@@ -136,10 +139,6 @@
 		border-collapse: collapse;
 	}
 
-	th {
-		text-align: left;
-	}
-
 	td {
 		border-bottom: 1px solid black;
 		padding: 6px;
@@ -212,8 +211,8 @@
 		<th>Quantity</th>
 		<th>Desired Rls Date</th>
 		<th>Desired Want Date</th>
-		<th>Duration</th>
 		<th>Commodity Code</th>
+		<th>Duration</th>
 		<th>Labour-hours</th>
 	</tr>
 	{#each orders as order, index}
@@ -226,8 +225,8 @@
 			<td>{order.quantity}</td>
 			<td>{order.desiredRIsDate.toLocaleString()}</td>
 			<td>{order.desiredWantDate.toLocaleString()}</td>
-			<td>{order.duration ? order.duration.toFixed(2) : ''}</td>
 			<td>{order.code}</td>
+			<td>{order.duration ? order.duration.toFixed(2) : ''}</td>
 			<td>{order.laborHours ? order.laborHours.toFixed(2): ''}</td>
 		</tr>
 	{/each}
