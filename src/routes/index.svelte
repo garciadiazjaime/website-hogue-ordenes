@@ -11,17 +11,20 @@
 	let shiftStartTime = '08:00:00 AM'
 
 	onMount(async () => {
-		let data = localStorage.getItem('schedule');
+		const schedule = localStorage.getItem('schedule');
 
-		if (data) {
-			orders = JSON.parse(data)
+		if (schedule) {
+			orders = JSON.parse(schedule)
 		}
 
-		data = localStorage.getItem('catalog')
+		const data = localStorage.getItem('catalog')
 		if (data) {
-			catalog = JSON.parse(data)
-		}
+			catalog = JSON.parse(data).reduce((accu, item) => {
+				accu[item.id] = item
 
+				return accu
+			}, {})
+		}
 	});
 
 	async function fileHandler(event) {
@@ -71,10 +74,16 @@
 		const firstDate = new Date(`${startDate} ${shiftStartTime}`)
 
 		orders = orders.map((order, index) => {
-			const part = catalog[0]
-			const duration = part.time * part.pieces // order.quantity
+			const part = catalog[order.partId] || catalog['00110']
 
-			console.log(`--- ${index+1}:${order.partId} --- \npieces: ${part.pieces}\ntime: ${part.time}\nduration: ${duration}\nsetup: ${part.setup}\nquantity: ${order.quantity}`)
+			if (!catalog[order.partId]) {
+				order.missingPart = true
+			}
+
+			order.duration = order.quantity / part.piecesByHour
+			order.laborHours = order.quantity * part.hrsByPiece
+
+			console.log(`--- ${index+1}:${order.partId} --- \npiecesByHour: ${part.piecesByHour}\nhrsByPiece: ${part.hrsByPiece}\nduration: ${order.duration}\nsetup: ${part.setup}\nquantity: ${order.quantity}`)
 
 			if (index === 0) {
 				order.desiredRIsDate = new Date(firstDate)
@@ -85,7 +94,7 @@
 			}
 
 			order.desiredWantDate = new Date(order.desiredRIsDate)
-			order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + duration * 60)
+			order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + order.duration * 60)
 
 
 			const shiftEndTime = new Date(order.desiredRIsDate)
@@ -100,7 +109,7 @@
 				order.desiredRIsDate.setSeconds(firstDate.getSeconds())
 
 				order.desiredWantDate = new Date(order.desiredRIsDate)
-				order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + duration * 60)
+				order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + order.duration * 60)
 
 				order.newDay = true
 			}
@@ -155,6 +164,10 @@
 	.new-day {
 		border-top: #868585 solid 6px;
 	}
+
+	.no-part {
+		border-left: red solid 6px;
+	}
 </style>
 
 <svelte:head>
@@ -199,10 +212,12 @@
 		<th>Quantity</th>
 		<th>Desired Rls Date</th>
 		<th>Desired Want Date</th>
+		<th>Duration</th>
 		<th>Commodity Code</th>
+		<th>Labour-hours</th>
 	</tr>
 	{#each orders as order, index}
-		<tr class:new-day={order.newDay}>
+		<tr class:new-day={order.newDay} class:no-part={order.missingPart}>
 			<td><input type="text" value={index+1} on:change={event => orderHandler(event, index)}></td>
 			<td>{order.baseId}</td>
 			<td>{order.partId}</td>
@@ -211,7 +226,9 @@
 			<td>{order.quantity}</td>
 			<td>{order.desiredRIsDate.toLocaleString()}</td>
 			<td>{order.desiredWantDate.toLocaleString()}</td>
+			<td>{order.duration ? order.duration.toFixed(2) : ''}</td>
 			<td>{order.code}</td>
+			<td>{order.laborHours ? order.laborHours.toFixed(2): ''}</td>
 		</tr>
 	{/each}
 </table>

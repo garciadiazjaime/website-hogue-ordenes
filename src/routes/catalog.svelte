@@ -2,13 +2,7 @@
 	import { onMount } from 'svelte';
 	import readXlsxFile from 'read-excel-file'
 
-	let rows = []
-	$: parts = rows.map((row, index) => ({
-		id: row[0],
-		pieces: row[1],
-		time: row[2],
-		setup: row[3],
-	}))
+	let parts = []
 
 	onMount(async () => {
 		const data = localStorage.getItem('catalog');
@@ -19,9 +13,14 @@
 	});
 
 	async function fileHandler(event) {
-		const response = await readXlsxFile(event.target.files[0], { sheet: 2 })
+		const response = await readXlsxFile(event.target.files[0], { sheet: 1 })
 
-		rows = response.slice(2)
+		parts = response.slice(1).map((row, index) => ({
+			id: row[0],
+			piecesByHour: row[1],
+			hrsByPiece: row[2],
+			setup: row[3],
+		}))
 
 		event.target.value = ''
 	}
@@ -81,16 +80,16 @@
 	<tr>
 		<th>#</th>
 		<th>Part ID</th>
-		<th>Pieces</th>
-		<th>Time</th>
-		<th>Setup</th>
+		<th>Pcs./Hr.</th>
+		<th>Hrs. / Piece</th>
+		<th>Set up time</th>
 	</tr>
 	{#each parts as part, index}
 		<tr>
 			<td>{index+1}</td>
 			<td>{part.id}</td>
-			<td>{part.pieces}</td>
-			<td>{part.time}</td>
+			<td>{part.piecesByHour}</td>
+			<td>{part.hrsByPiece.toFixed(4)}</td>
 			<td>{part.setup}</td>
 		</tr>
 	{/each}
