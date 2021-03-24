@@ -7,8 +7,22 @@
 	let catalog
 
 	let startDate = new Date().toLocaleDateString()
-	let hourPerShift = 8
+	const shifts = [
+		{
+			hours: 4,
+			startTime: '08:00:00 AM'
+		},
+		{
+			hours: 6,
+			startTime: '2:00:00 PM'
+		},
+		{
+			hours: 4,
+			startTime: '10:00:00 PM'
+		}
+	]
 	let shiftStartTime = '08:00:00 AM'
+	let currentShift = 0
 
 	onMount(async () => {
 		const schedule = localStorage.getItem('schedule');
@@ -63,18 +77,40 @@
 		alert('Schedule saved')
 	}
 
-	function generateSchedule() {
-		if (!startDate || !hourPerShift || !shiftStartTime) {
-			return alert('Plese fill in all the inputs.')
+	function getEndDate(startDate, duration, count) {
+		
+		const shift = count % 3
+		const limitDate = new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
+		limitDate.setMinutes(limitDate.getMinutes() + shifts[shift].hours * 60)
+
+		const endDate = new Date(startDate)
+		endDate.setMinutes(endDate.getMinutes() + duration * 60)
+
+		if (endDate.getTime() <= limitDate.getTime()) {
+			return {
+				endDate,
+				shift,
+			}
 		}
 
+		if (limitDate < startDate) {
+			return getEndDate(startDate, duration, count + 1)
+		}
+
+		const hoursDoneOnThisShift = (limitDate - startDate) / 1000 / 60 / 60
+
+		return getEndDate(limitDate, hoursDoneOnThisShift, count + 1)
+	}
+
+	function generateSchedule() {
 		if (!catalog) {
 			return alert('Import the catalog first.')
 		}
-
-		console.log(catalog)
 		
 		const firstDate = new Date(`${startDate} ${shiftStartTime}`)
+
+		let shiftHoursConsumed = []
+		let hours = 0
 
 		orders = orders.map((order, index) => {
 			const part = catalog[order.partId] || catalog['00110']
@@ -83,39 +119,22 @@
 				order.missingPart = true
 			}
 
-			order.duration = order.quantity / part.piecesByHour
+			const duration = order.quantity / part.piecesByHour
 			order.laborHours = order.quantity * part.hrsByPiece
-
-			console.log(`--- ${index+1}:${order.partId} --- \npiecesByHour: ${part.piecesByHour}\nhrsByPiece: ${part.hrsByPiece}\nduration: ${order.duration}\nsetup: ${part.setup}\nquantity: ${order.quantity}`)
 
 			if (index === 0) {
 				order.desiredRIsDate = new Date(firstDate)
-			} 
-			else {
+			}  else {
 				order.desiredRIsDate = new Date(orders[index - 1].desiredWantDate)
 				order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
 			}
-
-			order.desiredWantDate = new Date(order.desiredRIsDate)
-			order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + order.duration * 60)
+			
 
 
-			const shiftEndTime = new Date(order.desiredRIsDate)
-			shiftEndTime.setHours(firstDate.getHours() + hourPerShift)
-			shiftEndTime.setMinutes(firstDate.getMinutes())
-			shiftEndTime.setSeconds(firstDate.getSeconds())
+			const { shift, endDate } = getEndDate(order.desiredRIsDate, duration, currentShift)
+			currentShift = shift
 
-			if (order.desiredWantDate.getTime() > shiftEndTime.getTime()) {
-				order.desiredRIsDate.setDate(order.desiredRIsDate.getDate() + 1)
-				order.desiredRIsDate.setHours(firstDate.getHours())
-				order.desiredRIsDate.setMinutes(firstDate.getMinutes())
-				order.desiredRIsDate.setSeconds(firstDate.getSeconds())
-
-				order.desiredWantDate = new Date(order.desiredRIsDate)
-				order.desiredWantDate.setMinutes(order.desiredWantDate.getMinutes() + order.duration * 60)
-
-				order.newDay = true
-			}
+			order.desiredWantDate = endDate
 
 			return order
 		})
@@ -184,11 +203,19 @@
 	</tr>
 	<tr>
 		<th>Shift hours</th>
-		<td><input type="text" bind:value={hourPerShift}></td>
+		<td>
+			<input type="text" bind:value={shifts[0].hours}>
+			<input type="text" bind:value={shifts[1].hours}>
+			<input type="text" bind:value={shifts[2].hours}>
+		</td>
 	</tr>
 	<tr>
 		<th>Start Time</th>
-		<td><input type="text" bind:value={shiftStartTime}></td>
+		<td>
+			<input type="text" bind:value={shifts[0].startTime}>
+			<input type="text" bind:value={shifts[1].startTime}>
+			<input type="text" bind:value={shifts[2].startTime}>
+		</td>
 	</tr>
 	<tr>
 		<th></th>
@@ -212,7 +239,6 @@
 		<th>Desired Rls Date</th>
 		<th>Desired Want Date</th>
 		<th>Commodity Code</th>
-		<th>Duration</th>
 		<th>Labour-hours</th>
 	</tr>
 	{#each orders as order, index}
@@ -226,7 +252,6 @@
 			<td>{order.desiredRIsDate.toLocaleString()}</td>
 			<td>{order.desiredWantDate.toLocaleString()}</td>
 			<td>{order.code}</td>
-			<td>{order.duration ? order.duration.toFixed(2) : ''}</td>
 			<td>{order.laborHours ? order.laborHours.toFixed(2): ''}</td>
 		</tr>
 	{/each}
