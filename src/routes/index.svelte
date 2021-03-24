@@ -23,6 +23,8 @@
 	]
 	let shiftStartTime = '08:00:00 AM'
 	let currentShift = 0
+	let totalLabourHours = 0
+	let initialSetup = null
 
 	onMount(async () => {
 		const schedule = localStorage.getItem('schedule');
@@ -124,12 +126,13 @@
 
 			if (index === 0) {
 				order.desiredRIsDate = new Date(firstDate)
+				if (initialSetup) {
+					order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + initialSetup * 60)
+				}
 			}  else {
 				order.desiredRIsDate = new Date(orders[index - 1].desiredWantDate)
 				order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
 			}
-			
-
 
 			const { shift, endDate } = getEndDate(order.desiredRIsDate, duration, currentShift)
 			currentShift = shift
@@ -138,6 +141,14 @@
 
 			return order
 		})
+	}
+
+	function updateLabourHours() {
+		totalLabourHours = orders.reduce((accu, item) => {
+			accu += item.countHours ? item.laborHours : 0
+
+			return accu
+		}, 0)
 	}
 </script>
 
@@ -218,6 +229,18 @@
 		</td>
 	</tr>
 	<tr>
+		<th>Initial Setup</th>
+		<td>
+			<input type="text" bind:value={initialSetup}>
+		</td>
+	</tr>
+	<tr>
+		<th>Total Labour Hours</th>
+		<td>
+			{totalLabourHours.toFixed(2)}
+		</td>
+	</tr>
+	<tr>
 		<th></th>
 		<td>
 			<input type="submit" value="Generate Schedule" on:click={generateSchedule}>
@@ -230,6 +253,7 @@
 
 <table class="orders">
 	<tr>
+		<th></th>
 		<th>#</th>
 		<th>Base ID</th>
 		<th>Part ID</th>
@@ -243,6 +267,7 @@
 	</tr>
 	{#each orders as order, index}
 		<tr class:new-day={order.newDay} class:no-part={order.missingPart}>
+			<td><input type="checkbox" bind:checked={order.countHours} on:change={updateLabourHours}></td>
 			<td><input type="text" value={index+1} on:change={event => orderHandler(event, index)}></td>
 			<td>{order.baseId}</td>
 			<td>{order.partId}</td>
