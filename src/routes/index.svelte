@@ -126,7 +126,7 @@
 		let shiftHoursConsumed = []
 		let hours = 0
 
-		orders = orders.slice(0, 3).map((order, index) => {
+		orders = orders.map((order, index) => {
 			const part = catalog[order.partId] || catalog['00110']
 
 			if (!catalog[order.partId]) {
@@ -141,8 +141,18 @@
 					order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + initialSetup * 60)
 				}
 			}  else {
-				order.desiredRIsDate = getStartDate(new Date(orders[index - 1].desiredWantDate), 0)
-				order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
+				const startTime = new Date(orders[index - 1].desiredWantDate)
+				startTime.setMinutes(startTime.getMinutes() + part.setup * 60)
+
+				const endShift = new Date(`${startTime.toLocaleDateString()} ${shifts[currentShift].startTime}`)
+				endShift.setMinutes(endShift.getMinutes() + shifts[currentShift].hours * 60)
+
+				if (startTime > endShift) {
+					order.desiredRIsDate = getStartDate(startTime, 0)
+					order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
+				} else {
+					order.desiredRIsDate = startTime
+				}
 			}
 
 			const { shift, endDate } = getEndDate(order.desiredRIsDate, duration, currentShift)
