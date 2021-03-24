@@ -79,29 +79,41 @@
 		alert('Schedule saved')
 	}
 
-	function getEndDate(startDate, duration, count) {
-		
+	function getStartDate(startDate, count) {
 		const shift = count % 3
-		const limitDate = new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
-		limitDate.setMinutes(limitDate.getMinutes() + shifts[shift].hours * 60)
+		const endShift = new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
+		endShift.setMinutes(endShift.getMinutes() + shifts[shift].hours * 60)
+
+		if (startDate < endShift) {
+			return new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
+		}
+
+		return getStartDate(startDate, count + 1)
+	}
+
+	function getEndDate(startDate, duration, count) {
+		const shift = count % 3
+		const endShift = new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
+		endShift.setMinutes(endShift.getMinutes() + shifts[shift].hours * 60)
 
 		const endDate = new Date(startDate)
 		endDate.setMinutes(endDate.getMinutes() + duration * 60)
 
-		if (endDate.getTime() <= limitDate.getTime()) {
+		if (endDate <= endShift) {
 			return {
 				endDate,
 				shift,
 			}
 		}
 
-		if (limitDate < startDate) {
+		if (startDate > endShift) {
 			return getEndDate(startDate, duration, count + 1)
 		}
 
-		const hoursDoneOnThisShift = (limitDate - startDate) / 1000 / 60 / 60
+		const hoursDoneOnThisShift = (endShift - startDate) / 1000 / 60 / 60
+		const newStartDate = getStartDate(endShift, 0)
 
-		return getEndDate(limitDate, hoursDoneOnThisShift, count + 1)
+		return getEndDate(newStartDate, duration - hoursDoneOnThisShift, count + 1)
 	}
 
 	function generateSchedule() {
@@ -114,7 +126,7 @@
 		let shiftHoursConsumed = []
 		let hours = 0
 
-		orders = orders.map((order, index) => {
+		orders = orders.slice(0, 3).map((order, index) => {
 			const part = catalog[order.partId] || catalog['00110']
 
 			if (!catalog[order.partId]) {
@@ -123,14 +135,13 @@
 
 			const duration = order.quantity / part.piecesByHour
 			order.laborHours = order.quantity * part.hrsByPiece
-
 			if (index === 0) {
 				order.desiredRIsDate = new Date(firstDate)
 				if (initialSetup) {
 					order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + initialSetup * 60)
 				}
 			}  else {
-				order.desiredRIsDate = new Date(orders[index - 1].desiredWantDate)
+				order.desiredRIsDate = getStartDate(new Date(orders[index - 1].desiredWantDate), 0)
 				order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
 			}
 
