@@ -25,6 +25,7 @@
 	let currentShift = 0
 	let totalLabourHours = 0
 	let initialSetup = null
+	const shift = []
 
 	onMount(async () => {
 		const schedule = localStorage.getItem('schedule');
@@ -190,6 +191,10 @@
 		border-collapse: collapse;
 	}
 
+	th {
+		text-align: left;
+	}
+
 	td {
 		border-bottom: 1px solid black;
 		padding: 6px;
@@ -221,38 +226,41 @@
 </style>
 
 <svelte:head>
-	<title>Workload Schedule | Hogue</title>
+	<title>Production Schedule | Hogue</title>
 </svelte:head>
 
-<h1>Workload Schedule</h1>
+<h1>Production Schedule</h1>
 
 <input type="file" on:change={fileHandler}>
 
 <table>
 	<tr>
-		<th>Start Date</th>
-		<td><input type="text" bind:value={startDate}></td>
-	</tr>
-	<tr>
-		<th>Shift hours</th>
+		<th>Shift</th>
 		<td>
-			<input type="text" bind:value={shifts[0].hours}>
-			<input type="text" bind:value={shifts[1].hours}>
-			<input type="text" bind:value={shifts[2].hours}>
-		</td>
-	</tr>
-	<tr>
-		<th>Start Time</th>
-		<td>
-			<input type="text" bind:value={shifts[0].startTime}>
-			<input type="text" bind:value={shifts[1].startTime}>
-			<input type="text" bind:value={shifts[2].startTime}>
+			<table>
+				<tr>
+					<th>#1 L-V <br />06:00-16:00</th>
+					<th>#2 L-S <br />06:00-14:00</th>
+					<th>#3 L-S <br />14:00-21:30</th>
+					<th>#4 L-V <br />14:00-23:15</th>
+					<th>#5 L-V <br />16:00-01:00</th>
+					<th>#6 L-V <br />21:15-06:15</th>
+				</tr>
+				<tr>
+					<td><input type="checkbox" bind:checked={shift[0]}></td>
+					<td><input type="checkbox" bind:checked={shift[1]}></td>
+					<td><input type="checkbox" bind:checked={shift[2]}></td>
+					<td><input type="checkbox" bind:checked={shift[3]}></td>
+					<td><input type="checkbox" bind:checked={shift[4]}></td>
+					<td><input type="checkbox" bind:checked={shift[5]}></td>
+				</tr>
+			</table>
 		</td>
 	</tr>
 	<tr>
 		<th>Initial Setup</th>
 		<td>
-			<input type="text" bind:value={initialSetup}>
+			<input type="checkbox" bind:checked={initialSetup}>
 		</td>
 	</tr>
 	<tr>
