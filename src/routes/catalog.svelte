@@ -12,17 +12,40 @@
 		}
 	});
 
+	function isNumber(n){
+    return Number(n) === n
+	}
+
 	async function fileHandler(event) {
-		const response = await readXlsxFile(event.target.files[0], { sheet: 1 })
+		const sheetsTotal = await readXlsxFile(event.target.files[0], { getSheets: true }).then((sheets) => sheets)
 
-		parts = response.slice(1).map((row, index) => ({
-			id: row[0],
-			piecesByHour: row[1],
-			hrsByPiece: row[2],
-			setup: row[3],
-		}))
+		const promises = sheetsTotal.map(async (sheet, index) => {
+			const response = await readXlsxFile(event.target.files[0], { sheet: index + 1 })
 
-		event.target.value = ''
+			const items = response.slice(1).map((row, index) => {
+				const isValid = isNumber(row[1]) && isNumber(row[2])
+
+				return {
+					id: row[0],
+					piecesByHour: row[1],
+					hrsByPiece: row[2],
+					setup: row[3],
+					isValid,
+				}
+			})
+
+			return items
+		}, [])
+
+		const result = await Promise.all(promises)
+
+		parts = result.reduce((accu, items) => {
+			if (items.length) {
+				accu.push(...items)
+			}
+
+			return accu
+		}, [])
 	}
 
 	function saveHandler(event) {
@@ -65,6 +88,10 @@
 		padding: 6px;
 		font-size: 1.1em;
 	}
+
+	.invalid {
+		border-left: red solid 6px;
+	}
 </style>
 
 <svelte:head>
@@ -85,11 +112,11 @@
 		<th>Set up time</th>
 	</tr>
 	{#each parts as part, index}
-		<tr>
+		<tr class:invalid={!part.isValid}>
 			<td>{index+1}</td>
 			<td>{part.id}</td>
-			<td>{part.piecesByHour}</td>
-			<td>{part.hrsByPiece.toFixed(4)}</td>
+			<td>{part.isValid ? part.piecesByHour.toFixed(4) : ''}</td>
+			<td>{part.isValid ? part.hrsByPiece.toFixed(4) :  ''}</td>
 			<td>{part.setup}</td>
 		</tr>
 	{/each}
