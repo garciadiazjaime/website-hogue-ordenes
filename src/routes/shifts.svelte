@@ -2,27 +2,27 @@
   const shifts = [
     {
       title: 'L-V 06:00-16:00',
-      breaks: '10:00 am A 10:30am - 2:00 pm A 2:30 pm'
+      breaks: '10:00am A 10:30am - 02:00pm A 02:30pm'
     },
     {
       title: 'L-S 06:00-14:00',
-      breaks: '9:30 am A 10:00am'
+      breaks: '09:30am A 10:00am'
     },
     {
       title: 'L-S 14:00-21:30',
-      breaks: '10:00 am A 10:30am'
+      breaks: '10:00am A 10:30am'
     },
     {
       title: 'L-V 14:00-23:15',
-      breaks: '5:00 pm A 6:00 pm'
+      breaks: '05:00pm A 06:00pm'
     },
     {
       title: 'L-V 16:00-01:00',
-      breaks: '8:00 pm A 9:00 pm'
+      breaks: '08:00pm A 09:00pm'
     },
     {
       title: 'L-V 21:15-06:15',
-      breaks: '1:30 am A 2:00am - 4:30 am A 5:00 am'
+      breaks: '01:30am A 02:00am - 04:30am A 05:00am'
     },
   ]
 </script>
