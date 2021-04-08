@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import readXlsxFile from 'read-excel-file'
 
+	import { shifts as shiftsData } from '../support/shifts'
+
 	let rows = []
 	let orders = []
 	let catalog
@@ -239,12 +241,9 @@
 		<td>
 			<table>
 				<tr>
-					<th>#1 L-V <br />06:00-16:00</th>
-					<th>#2 L-S <br />06:00-14:00</th>
-					<th>#3 L-S <br />14:00-21:30</th>
-					<th>#4 L-V <br />14:00-23:15</th>
-					<th>#5 L-V <br />16:00-01:00</th>
-					<th>#6 L-V <br />21:15-06:15</th>
+					{#each shiftsData as shift, index}
+					<th>#{index + 1} <br />{shift.title}</th>
+					{/each}
 				</tr>
 				<tr>
 					<td><input type="checkbox" bind:checked={shift[0]}></td>

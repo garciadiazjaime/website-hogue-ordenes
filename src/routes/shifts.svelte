@@ -1,30 +1,5 @@
 <script>
-  const shifts = [
-    {
-      title: 'L-V 06:00-16:00',
-      breaks: '10:00am A 10:30am - 02:00pm A 02:30pm'
-    },
-    {
-      title: 'L-S 06:00-14:00',
-      breaks: '09:30am A 10:00am'
-    },
-    {
-      title: 'L-S 14:00-21:30',
-      breaks: '10:00am A 10:30am'
-    },
-    {
-      title: 'L-V 14:00-23:15',
-      breaks: '05:00pm A 06:00pm'
-    },
-    {
-      title: 'L-V 16:00-01:00',
-      breaks: '08:00pm A 09:00pm'
-    },
-    {
-      title: 'L-V 21:15-06:15',
-      breaks: '01:30am A 02:00am - 04:30am A 05:00am'
-    },
-  ]
+  import { shifts } from '../support/shifts'
 </script>
 
 <style>
