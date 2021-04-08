@@ -3,6 +3,7 @@
 	import readXlsxFile from 'read-excel-file'
 
 	import { shifts as shiftsData } from '../support/shifts'
+	import WorkingTimes from '../support/working-times'
 
 	let rows = []
 	let orders = []
@@ -27,7 +28,7 @@
 	let currentShift = 0
 	let totalLabourHours = 0
 	let initialSetup = null
-	const shift = []
+	const shift = [false, false, false, true]
 
 	onMount(async () => {
 		const schedule = localStorage.getItem('schedule');
@@ -123,49 +124,80 @@
 		if (!catalog) {
 			return alert('Import the catalog first.')
 		}
-		
-		const firstDate = new Date(`${startDate} ${shiftStartTime}`)
 
-		let shiftHoursConsumed = []
-		let hours = 0
+		if (shift.length === 0) {
+			return alert('Please select at least one shift.')
+		}
+
+		const shiftsSelected = shift.reduce((accu, item, index) => {
+			if (item) {
+				accu.push(index)
+			}
+
+			return accu
+		}, [])
+
+		const wt = new WorkingTimes()
+		wt.setStartDate(startDate)
+
+		shiftsSelected.map(index => wt.addShift(index))
+
+		wt.print()
+
+
+		
+		// const firstDate = new Date(`${startDate} ${shiftStartTime}`)
+		// let shiftHoursConsumed = []
+		// let hours = 0
 
 		orders = orders.map((order, index) => {
-			const part = catalog[order.partId] || catalog['00110']
+			const part = catalog[order.partId] || catalog['11100']
 
 			if (!catalog[order.partId]) {
 				order.missingPart = true
 			}
 
-			return order
-
 			const duration = order.quantity / part.piecesByHour
+			order.duration = duration
 			order.laborHours = order.quantity * part.hrsByPiece
+
 			if (index === 0) {
-				order.desiredRIsDate = new Date(firstDate)
-				if (initialSetup) {
-					order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + initialSetup * 60)
-				}
-			}  else {
-				const startTime = new Date(orders[index - 1].desiredWantDate)
-				startTime.setMinutes(startTime.getMinutes() + part.setup * 60)
-
-				const endShift = new Date(`${startTime.toLocaleDateString()} ${shifts[currentShift].startTime}`)
-				endShift.setMinutes(endShift.getMinutes() + shifts[currentShift].hours * 60)
-
-				if (startTime > endShift) {
-					order.desiredRIsDate = getStartDate(startTime, 0)
-					order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
-				} else {
-					order.desiredRIsDate = startTime
-				}
+				order.desiredRIsDate = wt.addEvent(duration)
+			} else {
+				order.desiredRIsDate = new Date(orders[index - 1].desiredWantDate)
 			}
 
-			const { shift, endDate } = getEndDate(order.desiredRIsDate, duration, currentShift)
-			currentShift = shift
-
-			order.desiredWantDate = endDate
+			order.desiredWantDate = new Date(order.desiredRIsDate)
+			order.desiredWantDate.setHours(order.desiredWantDate.getHours() + duration)
 
 			return order
+
+			// if (index === 0) {
+			// 	order.desiredRIsDate = new Date(firstDate)
+			// 	if (initialSetup) {
+			// 		order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + initialSetup * 60)
+			// 	}
+			// }  else {
+			// 	const startTime = new Date(orders[index - 1].desiredWantDate)
+			// 	startTime.setMinutes(startTime.getMinutes() + part.setup * 60)
+
+			// 	const endShift = new Date(`${startTime.toLocaleDateString()} ${shifts[currentShift].startTime}`)
+			// 	endShift.setMinutes(endShift.getMinutes() + shifts[currentShift].hours * 60)
+
+			// 	if (startTime > endShift) {
+			// 		order.desiredRIsDate = getStartDate(startTime, 0)
+			// 		order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
+			// 	} else {
+			// 		order.desiredRIsDate = startTime
+			// 	}
+			// }
+
+			// const { shift, endDate } = getEndDate(order.desiredRIsDate, duration, currentShift)
+			// currentShift = shift
+
+			// order.desiredWantDate = endDate
+
+			// return order
 		})
 	}
 
@@ -248,14 +280,20 @@
 					{/each}
 				</tr>
 				<tr>
-					<td><input type="checkbox" bind:checked={shift[0]}></td>
-					<td><input type="checkbox" bind:checked={shift[1]}></td>
-					<td><input type="checkbox" bind:checked={shift[2]}></td>
-					<td><input type="checkbox" bind:checked={shift[3]}></td>
-					<td><input type="checkbox" bind:checked={shift[4]}></td>
-					<td><input type="checkbox" bind:checked={shift[5]}></td>
+					<td><input type="checkbox" bind:checked={shift[0]} value="1"></td>
+					<td><input type="checkbox" bind:checked={shift[1]} value="2"></td>
+					<td><input type="checkbox" bind:checked={shift[2]} value="3"></td>
+					<td><input type="checkbox" bind:checked={shift[3]} value="4"></td>
+					<td><input type="checkbox" bind:checked={shift[4]} value="5"></td>
+					<td><input type="checkbox" bind:checked={shift[5]} value="6"></td>
 				</tr>
 			</table>
+		</td>
+	</tr>
+	<tr>
+		<th>Start Date</th>
+		<td>
+			<input type="input" bind:value={startDate}>
 		</td>
 	</tr>
 	<tr>
@@ -294,6 +332,7 @@
 		<th>Desired Want Date</th>
 		<th>Commodity Code</th>
 		<th>Labour-hours</th>
+		<th>Duration</th>
 	</tr>
 	{#each orders as order, index}
 		<tr class:new-day={order.newDay} class:no-part={order.missingPart}>
@@ -307,7 +346,8 @@
 			<td>{order.desiredRIsDate.toLocaleString()}</td>
 			<td>{order.desiredWantDate.toLocaleString()}</td>
 			<td>{order.code}</td>
-			<td>{order.laborHours ? order.laborHours.toFixed(2): ''}</td>
+			<td>{order.laborHours ? order.laborHours.toFixed(2) : ''}</td>
+			<td>{order.duration ? order.duration.toFixed(2) : ''}</td>
 		</tr>
 	{/each}
 </table>
