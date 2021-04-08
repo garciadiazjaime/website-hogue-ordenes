@@ -50,7 +50,7 @@
 	});
 
 	async function fileHandler(event) {
-		const response = await readXlsxFile(event.target.files[0], { sheet: 3 })
+		const response = await readXlsxFile(event.target.files[0], { sheet: 1 })
 
 		orders = response.slice(1).map((row, index) => ({
 			baseId: row[1],
@@ -135,6 +135,8 @@
 			if (!catalog[order.partId]) {
 				order.missingPart = true
 			}
+
+			return order
 
 			const duration = order.quantity / part.piecesByHour
 			order.laborHours = order.quantity * part.hrsByPiece
