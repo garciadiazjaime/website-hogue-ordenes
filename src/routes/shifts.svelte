@@ -1,5 +1,21 @@
 <script>
-  import { shifts } from '../support/shifts'
+	import { onMount } from 'svelte';
+	import { shifts as shiftsBase } from '../support/shifts'
+
+	let shifts = []
+
+	onMount(async () => {
+		const data = localStorage.getItem('shifts');
+		console.log(JSON.parse(data))
+
+		shifts = data ? JSON.parse(data) : shiftsBase
+	});
+
+	function saveHandler() {
+		localStorage.setItem('shifts', JSON.stringify(shifts));
+
+		alert('shifts saved')
+	}
 </script>
 
 <style>
@@ -30,6 +46,11 @@
 
 	tr:nth-child(even) {background: #deeced;}
 	tr:nth-child(odd) {background: #FFF}
+
+	input {
+		padding: 6px;
+		font-size: 1.1em;
+	}
 </style>
 
 <svelte:head>
@@ -38,17 +59,30 @@
 
 <h1>Shift Management</h1>
 
+<input type="submit" value="Save" on:click={saveHandler}>
+
 <table>
   <tr>
     <th>Shift</th>
     <th>Shift Hours</th>
     <th>Breaks</th>
+		<th>Overtime</th>
   </tr>
-  {#each shifts as shift, index}
-  <tr>
-    <td>{index+1}</td>
-    <td>{shift.title}</td>
-    <td>{shift.breaks}</td>
-  </tr>
-  {/each}
+	{#each shifts as shift, index}
+	<tr>
+		<td>{index+1}</td>
+		<td>{shift.title}</td>
+		<td>{shift.breaksTitle}</td>
+		<td>
+			<table>
+				{#each shift.overtime as overtime, index}
+					<tr>
+						<th>{shift.days[index]}</th>
+						<td><input type="text" bind:value={overtime}></td>
+					</tr>
+				{/each}
+			</table>
+		</td>
+	</tr>
+	{/each}
 </table>
