@@ -8,6 +8,7 @@
 	let rows = []
 	let orders = []
 	let catalog
+	let holidays = []
 
 	let startDate = new Date().toLocaleDateString()
 	const shifts = [
@@ -28,7 +29,7 @@
 	let currentShift = 0
 	let totalLabourHours = 0
 	let initialSetup = null
-	const shift = [false, false, false, true]
+	const shift = [true, false, false, false]
 
 	onMount(async () => {
 		const schedule = localStorage.getItem('schedule');
@@ -259,6 +260,10 @@
 	.no-part {
 		border-left: red solid 6px;
 	}
+
+	input[type=checkbox] {
+		transform: scale(2);
+	}
 </style>
 
 <svelte:head>
@@ -294,6 +299,14 @@
 		<th>Start Date</th>
 		<td>
 			<input type="input" bind:value={startDate}>
+		</td>
+	</tr>
+	<tr>
+		<th>Holidays</th>
+		<td>
+			<input type="text" bind:value={holidays[0]}>
+			<input type="text" bind:value={holidays[1]}>
+			<input type="text" bind:value={holidays[2]}>
 		</td>
 	</tr>
 	<tr>
