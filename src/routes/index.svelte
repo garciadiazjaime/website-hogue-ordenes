@@ -10,22 +10,6 @@
 	let holidays = []
 
 	let startDate = new Date().toLocaleDateString()
-	const shifts = [
-		{
-			hours: 4,
-			startTime: '08:00:00 AM'
-		},
-		{
-			hours: 6,
-			startTime: '2:00:00 PM'
-		},
-		{
-			hours: 4,
-			startTime: '10:00:00 PM'
-		}
-	]
-	let shiftStartTime = '08:00:00 AM'
-	let currentShift = 0
 	let totalLabourHours = 0
 	let initialSetup = null
 	const shift = [true, false, false, false]
@@ -53,7 +37,8 @@
 	async function fileHandler(event) {
 		const response = await readXlsxFile(event.target.files[0], { sheet: 1 })
 
-		orders = response.slice(1).map((row, index) => ({
+		const skipHeaders = true
+		orders = response.slice(skipHeaders && 1).map((row) => ({
 			baseId: row[1],
 			partId: row[4],
 			description: row[6],
@@ -116,13 +101,16 @@
 			order.duration = duration
 			order.laborHours = order.quantity * part.hrsByPiece
 
+			const setup = index > 0 || initialSetup ? part.setup : 0
+
 			const { startDate, endDate }  = wt.addEvent({
 				duration,
-				setup: order.setup,
+				setup,
 			})
 
 			order.desiredRIsDate = startDate
 			order.desiredWantDate = endDate
+			order.setup = setup
 			
 			return order
 		})
@@ -272,6 +260,7 @@
 		<th>Commodity Code</th>
 		<th>Labour-hours</th>
 		<th>Duration</th>
+		<th>Setup</th>
 	</tr>
 	{#each orders as order, index}
 		<tr class:new-day={order.newDay} class:no-part={order.missingPart}>
@@ -287,6 +276,7 @@
 			<td>{order.code}</td>
 			<td>{order.laborHours ? order.laborHours.toFixed(2) : ''}</td>
 			<td>{order.duration ? order.duration.toFixed(2) : ''}</td>
+			<td>{order.setup !== undefined ? order.setup : ''}</td>
 		</tr>
 	{/each}
 </table>
