@@ -5,7 +5,6 @@
 	import { shifts as shiftsData } from '../support/shifts'
 	import WorkingTimes from '../support/working-times'
 
-	let rows = []
 	let orders = []
 	let catalog
 	let holidays = []
@@ -84,43 +83,6 @@
 		alert('Schedule saved')
 	}
 
-	function getStartDate(startDate, count) {
-		const shift = count % 3
-		const endShift = new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
-		endShift.setMinutes(endShift.getMinutes() + shifts[shift].hours * 60)
-
-		if (startDate < endShift) {
-			return new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
-		}
-
-		return getStartDate(startDate, count + 1)
-	}
-
-	function getEndDate(startDate, duration, count) {
-		const shift = count % 3
-		const endShift = new Date(`${startDate.toLocaleDateString()} ${shifts[shift].startTime}`)
-		endShift.setMinutes(endShift.getMinutes() + shifts[shift].hours * 60)
-
-		const endDate = new Date(startDate)
-		endDate.setMinutes(endDate.getMinutes() + duration * 60)
-
-		if (endDate <= endShift) {
-			return {
-				endDate,
-				shift,
-			}
-		}
-
-		if (startDate > endShift) {
-			return getEndDate(startDate, duration, count + 1)
-		}
-
-		const hoursDoneOnThisShift = (endShift - startDate) / 1000 / 60 / 60
-		const newStartDate = getStartDate(endShift, 0)
-
-		return getEndDate(newStartDate, duration - hoursDoneOnThisShift, count + 1)
-	}
-
 	function generateSchedule() {
 		if (!catalog) {
 			return alert('Import the catalog first.')
@@ -139,17 +101,9 @@
 		}, [])
 
 		const wt = new WorkingTimes()
-		wt.setStartDate(startDate)
+		wt.setScheduleStartDate(startDate)
 
 		shiftsSelected.map(index => wt.addShift(index))
-
-		wt.print()
-
-
-		
-		// const firstDate = new Date(`${startDate} ${shiftStartTime}`)
-		// let shiftHoursConsumed = []
-		// let hours = 0
 
 		orders = orders.map((order, index) => {
 			const part = catalog[order.partId] || catalog['11100']
@@ -162,43 +116,15 @@
 			order.duration = duration
 			order.laborHours = order.quantity * part.hrsByPiece
 
-			if (index === 0) {
-				order.desiredRIsDate = wt.addEvent(duration)
-			} else {
-				order.desiredRIsDate = new Date(orders[index - 1].desiredWantDate)
-			}
+			const { startDate, endDate }  = wt.addEvent({
+				duration,
+				setup: order.setup,
+			})
 
-			order.desiredWantDate = new Date(order.desiredRIsDate)
-			order.desiredWantDate.setHours(order.desiredWantDate.getHours() + duration)
-
+			order.desiredRIsDate = startDate
+			order.desiredWantDate = endDate
+			
 			return order
-
-			// if (index === 0) {
-			// 	order.desiredRIsDate = new Date(firstDate)
-			// 	if (initialSetup) {
-			// 		order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + initialSetup * 60)
-			// 	}
-			// }  else {
-			// 	const startTime = new Date(orders[index - 1].desiredWantDate)
-			// 	startTime.setMinutes(startTime.getMinutes() + part.setup * 60)
-
-			// 	const endShift = new Date(`${startTime.toLocaleDateString()} ${shifts[currentShift].startTime}`)
-			// 	endShift.setMinutes(endShift.getMinutes() + shifts[currentShift].hours * 60)
-
-			// 	if (startTime > endShift) {
-			// 		order.desiredRIsDate = getStartDate(startTime, 0)
-			// 		order.desiredRIsDate.setMinutes(order.desiredRIsDate.getMinutes() + part.setup * 60)
-			// 	} else {
-			// 		order.desiredRIsDate = startTime
-			// 	}
-			// }
-
-			// const { shift, endDate } = getEndDate(order.desiredRIsDate, duration, currentShift)
-			// currentShift = shift
-
-			// order.desiredWantDate = endDate
-
-			// return order
 		})
 	}
 

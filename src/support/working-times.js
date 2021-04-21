@@ -103,6 +103,11 @@ class WorkingTimes {
       startDate,
       endDate
     })
+
+    return {
+      startDate,
+      endDate 
+    }
   }
 
   getEvents() {
