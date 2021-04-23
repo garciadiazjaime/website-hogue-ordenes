@@ -62,6 +62,25 @@ class WorkingTimes {
     return startDate
   }
 
+  isWorkableDay(date) {
+    const shift = this.getCurrentShift()
+
+    return shift.days.includes(date.getDay())
+  }
+
+  getNextAvailableDay(date) {
+    const shift = this.getCurrentShift()
+    const nextDate = new Date(`${date.toISOString().split('T')[0]} ${shift.startTime}`)
+
+    nextDate.setDate(nextDate.getDate() + 1)
+
+    while(!this.isWorkableDay(nextDate)) {
+      nextDate.setDate(nextDate.getDate() + 1)
+    }
+
+    return nextDate
+  }
+
   getEndDate(duration) {
     const shift = this.getCurrentShift()
     let endShift = new Date(`${this.startDate.toISOString().split('T')[0]} ${shift.endTime}`)
@@ -79,11 +98,11 @@ class WorkingTimes {
       } else {
         hoursLeft -= (endShift - startShift) / 1000 / 3600
         
-        endDate = new Date(`${endShift.toISOString().split('T')[0]} ${shift.startTime}`)
-        endDate.setDate(endDate.getDate() + 1)
-        endDate.setHours(endDate.getHours() + hoursLeft)
+        endDate = this.getNextAvailableDay(endShift)
 
-        endShift.setDate(endShift.getDate() + 1)
+        endShift = new Date(`${endDate.toISOString().split('T')[0]} ${shift.endTime}`)
+
+        endDate.setHours(endDate.getHours() + hoursLeft)
         startShift = new Date(`${endShift.toISOString().split('T')[0]} ${shift.startTime}`)
       }
     }
