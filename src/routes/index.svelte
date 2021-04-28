@@ -55,11 +55,12 @@
 	function orderHandler(event, index) {
 		const position = parseInt(event.target.value) - 1
 
-		const newOrders = [ ...orders.slice(0, index), ...orders.slice(index + 1) ]
-		orders = [...newOrders.slice(0, position), orders[index], ...newOrders.slice(position)]
+		const temp = orders[position]
+		orders[position] = orders[index]
+		orders[index] = temp
 
 		event.target.value = index + 1
-		document.querySelectorAll('table input')[position].focus()
+		document.querySelectorAll('table.orders input[type="text"]')[position].focus()
 	}
 
 	function saveHandler(event) {
