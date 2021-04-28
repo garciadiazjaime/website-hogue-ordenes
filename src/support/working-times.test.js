@@ -2,13 +2,14 @@ import WorkingTimes from './working-times'
 
 describe('working-times', () => {
 
-  describe('when the day last long enough for a task', () => {
+  describe('when the day is long enough for a task', () => {
     it('completes the task the same day', () => {
       const dateWednesday = '4/14/2021'
 
       const wt = new WorkingTimes()
       wt.setScheduleStartDate(dateWednesday)
       wt.addShift(0)
+      wt.setWorkingTimes()
 
       const events = [{
         duration: 8,
@@ -22,24 +23,25 @@ describe('working-times', () => {
         "setup": 0,
         "startDate": new Date("2021-04-14T11:00:00.000Z"),
         "endDate": new Date("2021-04-14T19:00:00.000Z"),
-      }, ]
+      }]
 
       expect(wt.getEvents()).toEqual(output)
     })
   })
 
-  describe('when the day does not last enough for a task', () => {
+  describe('when the day is not long enough for a task', () => {
     it('completes the task the next day', () => {
       const dateWednesday = '4/14/2021'
 
       const wt = new WorkingTimes()
       wt.setScheduleStartDate(dateWednesday)
       wt.addShift(0)
+      wt.setWorkingTimes()
 
       const events = [{
         duration: 16,
         setup: 0,
-      }, ]
+      }]
 
       events.forEach((event) => wt.addEvent(event))
 
@@ -48,24 +50,25 @@ describe('working-times', () => {
         "setup": 0,
         "startDate": new Date("2021-04-14T11:00:00.000Z"),
         "endDate": new Date("2021-04-15T17:00:00.000Z"),
-      }, ]
+      }]
 
       expect(wt.getEvents()).toEqual(output)
     })
   })
 
-  describe('when the setup last longer than the day', () => {
+  describe('when the setup is longer than the day', () => {
     it('completes the task the next day', () => {
       const dateWednesday = '4/14/2021'
 
       const wt = new WorkingTimes()
       wt.setScheduleStartDate(dateWednesday)
       wt.addShift(0)
+      wt.setWorkingTimes()
 
       const events = [{
         duration: 6,
         setup: 12,
-      }, ]
+      }]
 
       events.forEach((event) => wt.addEvent(event))
 
@@ -74,7 +77,7 @@ describe('working-times', () => {
         "setup": 12,
         "startDate": new Date("2021-04-15T13:00:00.000Z"),
         "endDate": new Date("2021-04-15T19:00:00.000Z"),
-      }, ]
+      }]
 
       expect(wt.getEvents()).toEqual(output)
     })
@@ -87,6 +90,7 @@ describe('working-times', () => {
       const wt = new WorkingTimes()
       wt.setScheduleStartDate(dateWednesday)
       wt.addShift(0)
+      wt.setWorkingTimes()
 
       const events = [{
           duration: 8,
@@ -125,6 +129,7 @@ describe('working-times', () => {
       const wt = new WorkingTimes()
       wt.setScheduleStartDate(dateTuesday)
       wt.addShift(0)
+      wt.setWorkingTimes()
 
       const events = [{
         duration: 31,
@@ -151,11 +156,12 @@ describe('working-times', () => {
       const wt = new WorkingTimes()
       wt.setScheduleStartDate(dateFriday)
       wt.addShift(0)
+      wt.setWorkingTimes()
 
       const events = [{
         duration: 12,
         setup: 0
-      }, ]
+      }]
 
       events.forEach((event) => wt.addEvent(event))
 
@@ -164,7 +170,7 @@ describe('working-times', () => {
         "setup": 0,
         "startDate": new Date("2021-04-16T11:00:00.000Z"),
         "endDate": new Date("2021-04-19T13:00:00.000Z"),
-      }, ]
+      }]
 
       expect(wt.getEvents()).toEqual(output)
     })
@@ -172,7 +178,7 @@ describe('working-times', () => {
 
   describe('when there are multiple shifts', () => {
     describe('and the task extends to next shift', () => {
-      it.only('ends the task in the next shift', () => {
+      it('ends the task in the next shift', () => {
         const dateFriday = '4/16/2021'
 
         const wt = new WorkingTimes()
@@ -205,6 +211,7 @@ describe('working-times', () => {
       const wt = new WorkingTimes()
       wt.addShift(0)
       wt.addShift(5)
+      wt.setWorkingTimes()
 
       expect(wt.getWorkingTimes()).toEqual([
         [1, "6:00", "16:00"],

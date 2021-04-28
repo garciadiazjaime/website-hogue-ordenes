@@ -2,6 +2,18 @@ import {
   shifts
 } from './shifts'
 
+function getIsNextDay(currentDay, nextDay) {
+  if (currentDay === nextDay) {
+    return 0
+  }
+
+  if (currentDay < nextDay) {
+    return 1
+  }
+
+  return (6 - currentDay) + nextDay + 1
+}
+
 class WorkingTimes {
   constructor() {
     this.scheduleStartDate = null
@@ -17,7 +29,6 @@ class WorkingTimes {
   setScheduleStartDate(date) {
     this.currentSlot = new Date(date).getDay()
     this.scheduleStartDate = date
-    this.startDate = new Date(date)
   }
 
   addShift(type) {
@@ -33,10 +44,14 @@ class WorkingTimes {
   }
 
   getNextSlot() {
+    let [ day ] = this.getCurrentSlot()
     const slot = (this.currentSlot + 1) % this.workingTimes.length
     this.currentSlot = slot
 
-    return this.workingTimes[slot]
+    const nextSlot = this.getCurrentSlot()
+    const isNextDay = getIsNextDay(day, nextSlot[0])
+
+    return [nextSlot, isNextDay]
   }
 
   setWorkingTimes() {
@@ -67,6 +82,8 @@ class WorkingTimes {
       return accu
     }, null)
 
+    this.startDate = new Date(`${this.scheduleStartDate} ${this.workingTimes[this.currentSlot][1]}`)
+    this.endDate = new Date(this.startDate)
     this.currentDay = this.currentSlot[0]
   }
 
@@ -94,16 +111,52 @@ class WorkingTimes {
   }
 
   getStartDate(setup) {
-    const [, startTime] = this.getCurrentSlot()
+    let [ , , endTime] = this.getCurrentSlot()
 
-    const date = new Date(`${this.startDate.toISOString().split('T')[0]} ${startTime}`)
-    this.startDate = date
+    let startDate = new Date(this.endDate)
+    let endDate = null
 
-    return date
+    let hoursLeft = setup
+    let endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
+
+    if (!hoursLeft) {
+      endDate = new Date(startDate)
+    }
+
+    while (hoursLeft > 0) {
+      const slotTime = (endSlot - startDate) / 1000 / 3600
+
+      if (hoursLeft < slotTime) {
+        endDate = new Date(startDate)
+        endDate.setHours(endDate.getHours() + hoursLeft)
+      }
+
+      hoursLeft -= slotTime
+
+      if (hoursLeft >= 0) {
+        let [[, startTime, endTime], isNextDay] = this.getNextSlot()
+
+        startDate = new Date(`${startDate.toISOString().split('T')[0]} ${startTime}`)
+        startDate.setDate(startDate.getDate() + isNextDay)
+
+        endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
+        if (endSlot < startDate) {
+          endSlot.setDate(endSlot.getDate() + 1)
+        }
+
+        if (hoursLeft === 0) {
+          endDate = startDate
+        }
+      }
+    }
+
+    this.startDate = new Date(endDate)
+
+    return endDate
   }
 
   getEndDate(duration) {
-    let [day, startTime, endTime] = this.getCurrentSlot()
+    let [ , , endTime] = this.getCurrentSlot()
 
     let startDate = new Date(this.startDate)
     let endDate = null
@@ -112,19 +165,25 @@ class WorkingTimes {
     let endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
 
     while (hoursLeft > 0) {
-      hoursLeft -= (endSlot - startDate) / 1000 / 3600
+      const slotTime = (endSlot - startDate) / 1000 / 3600
+
+      if (hoursLeft < slotTime) {
+        endDate = new Date(startDate)
+        endDate.setHours(endDate.getHours() + hoursLeft)
+      }
+      
+      hoursLeft -= slotTime
 
       if (hoursLeft > 0) {
-        [day, startTime, endTime] = this.getNextSlot()
+        let [[, startTime, endTime], isNextDay] = this.getNextSlot()
 
         startDate = new Date(`${startDate.toISOString().split('T')[0]} ${startTime}`)
+        startDate.setDate(startDate.getDate() + isNextDay)
+
         endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
         if (endSlot < startDate) {
           endSlot.setDate(endSlot.getDate() + 1)
         }
-
-        endDate = new Date(startDate)
-        endDate.setHours(endDate.getHours() + hoursLeft)
       }
     }
 
