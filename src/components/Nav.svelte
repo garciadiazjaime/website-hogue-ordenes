@@ -53,5 +53,6 @@
 		<li><a aria-current="{segment === undefined ? 'page' : undefined}" href=".">Schedule</a></li>
 		<li><a aria-current="{segment === 'catalog' ? 'page' : undefined}" href="./catalog">Catalog</a></li>
 		<li><a aria-current="{segment === 'shifts' ? 'page' : undefined}" href="./shifts">Shifts</a></li>
+		<li><a aria-current="{segment === 'config' ? 'page' : undefined}" href="./config">config</a></li>
 	</ul>
 </nav>
