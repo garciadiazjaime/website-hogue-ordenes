@@ -172,13 +172,14 @@ describe('working-times', () => {
 
   describe('when there are multiple shifts', () => {
     describe('and the task extends to next shift', () => {
-      it.skip('ends the task in the next shift', () => {
+      it.only('ends the task in the next shift', () => {
         const dateFriday = '4/16/2021'
 
         const wt = new WorkingTimes()
         wt.setScheduleStartDate(dateFriday)
         wt.addShift(0)
-        wt.addShift(5)
+        wt.addShift(4)
+        wt.setWorkingTimes()
 
         const events = [{
           duration: 12,
@@ -191,7 +192,7 @@ describe('working-times', () => {
           "duration": 12,
           "setup": 0,
           "startDate": new Date("2021-04-16T11:00:00.000Z"),
-          "endDate": new Date("2021-04-19T13:00:00.000Z"),
+          "endDate": new Date("2021-04-16T23:00:00.000Z"),
         }, ]
 
         expect(wt.getEvents()).toEqual(output)

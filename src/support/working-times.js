@@ -9,6 +9,7 @@ class WorkingTimes {
     this.endDate = null
     this.shifts = []
     this.events = []
+    this.workingTimes = []
     this.currentShift = 0
     this.currentSlot = 0
   }
@@ -16,6 +17,7 @@ class WorkingTimes {
   setScheduleStartDate(date) {
     this.currentSlot = new Date(date).getDay()
     this.scheduleStartDate = date
+    this.startDate = new Date(date)
   }
 
   addShift(type) {
@@ -27,10 +29,17 @@ class WorkingTimes {
   }
 
   getCurrentSlot() {
-    return this.currentSlot
+    return this.workingTimes[this.currentSlot]
   }
 
-  getWorkingTimes() {
+  getNextSlot() {
+    const slot = (this.currentSlot + 1) % this.workingTimes.length
+    this.currentSlot = slot
+
+    return this.workingTimes[slot]
+  }
+
+  setWorkingTimes() {
     const workingTimes = []
     const weekDays = [0, 1, 2, 3, 4, 5, 6]
 
@@ -47,46 +56,22 @@ class WorkingTimes {
       })
     })
 
-    return workingTimes
+    this.workingTimes = workingTimes
+
+    const firstDay = new Date(this.scheduleStartDate).getDay()
+    this.currentSlot = workingTimes.reduce((accu, [day], index) => {
+      if (!accu && day === firstDay) {
+        accu = index
+      }
+
+      return accu
+    }, null)
+
+    this.currentDay = this.currentSlot[0]
   }
 
-  getStartDate(setup) {
-    let startDate = null
-    const shift = this.getCurrentShift()
-
-    if (!this.events.length) {
-      startDate = new Date(`${this.scheduleStartDate} ${shift.startTime}`)
-    } else {
-      startDate = new Date(this.endDate)
-    }
-
-    let endShift = new Date(`${startDate.toISOString().split('T')[0]} ${shift.endTime}`)
-    let endDate = new Date(startDate)
-    endDate.setHours(endDate.getHours() + setup)
-    let hoursLeft = setup
-
-    while (hoursLeft > 0) {
-      if (endDate < endShift) {
-        startDate = endDate
-        hoursLeft = 0
-      } else if (endDate - endShift === 0) {
-        startDate = new Date(`${endShift.toISOString().split('T')[0]} ${shift.startTime}`)
-        startDate.setDate(endDate.getDate() + 1)
-        hoursLeft = 0
-      } else {
-        hoursLeft -= (endShift - startDate) / 1000 / 3600
-
-        endDate = new Date(`${endShift.toISOString().split('T')[0]} ${shift.startTime}`)
-        endDate.setDate(endDate.getDate() + 1)
-        endDate.setHours(endDate.getHours() + hoursLeft)
-
-        endShift.setDate(endShift.getDate() + 1)
-      }
-    }
-
-    this.startDate = startDate
-
-    return startDate
+  getWorkingTimes() {
+    return this.workingTimes
   }
 
   isWorkableDay(date) {
@@ -108,29 +93,38 @@ class WorkingTimes {
     return nextDate
   }
 
+  getStartDate(setup) {
+    const [, startTime] = this.getCurrentSlot()
+
+    const date = new Date(`${this.startDate.toISOString().split('T')[0]} ${startTime}`)
+    this.startDate = date
+
+    return date
+  }
+
   getEndDate(duration) {
-    const shift = this.getCurrentShift()
-    let endShift = new Date(`${this.startDate.toISOString().split('T')[0]} ${shift.endTime}`)
-    let startShift = new Date(this.startDate)
+    let [day, startTime, endTime] = this.getCurrentSlot()
 
-    let endDate = new Date(this.startDate)
+    let startDate = new Date(this.startDate)
+    let endDate = null
 
-    endDate.setHours(endDate.getHours() + duration)
     let hoursLeft = duration
+    let endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
 
     while (hoursLeft > 0) {
-      if (endDate <= endShift) {
-        this.endDate = endDate
-        hoursLeft = 0
-      } else {
-        hoursLeft -= (endShift - startShift) / 1000 / 3600
+      hoursLeft -= (endSlot - startDate) / 1000 / 3600
 
-        endDate = this.getNextAvailableDay(endShift)
+      if (hoursLeft > 0) {
+        [day, startTime, endTime] = this.getNextSlot()
 
-        endShift = new Date(`${endDate.toISOString().split('T')[0]} ${shift.endTime}`)
+        startDate = new Date(`${startDate.toISOString().split('T')[0]} ${startTime}`)
+        endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
+        if (endSlot < startDate) {
+          endSlot.setDate(endSlot.getDate() + 1)
+        }
 
+        endDate = new Date(startDate)
         endDate.setHours(endDate.getHours() + hoursLeft)
-        startShift = new Date(`${endShift.toISOString().split('T')[0]} ${shift.startTime}`)
       }
     }
 
