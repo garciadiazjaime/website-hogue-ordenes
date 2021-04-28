@@ -14,7 +14,7 @@ describe('working-times', () => {
       const events = [{
         duration: 8,
         setup: 0,
-      }, ]
+      }]
 
       events.forEach((event) => wt.addEvent(event))
 

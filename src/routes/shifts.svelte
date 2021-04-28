@@ -77,7 +77,7 @@
 			<table>
 				{#each shift.overtime as overtime, index}
 					<tr>
-						<th>{shift.days[index]}</th>
+						<th>{shift.daysTitle[index]}</th>
 						<td><input type="text" bind:value={overtime}></td>
 					</tr>
 				{/each}

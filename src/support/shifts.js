@@ -5,9 +5,9 @@ const shifts = [
     breaks: [['10:00', '10:30'], ['14:00', '14:30']],
     startTime: '6:00',
     endTime: '16:00',
-    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     days: [1, 2, 3, 4, 5],
-    overtime: [0, 0, 0, 0, 0],
+    overtime: [0, 0, 0, 0, 0, 0],
   },
   {
     title: 'M-S 6:00am A 2:00pm',
@@ -36,9 +36,9 @@ const shifts = [
     breaks: [['17:00', '18:00']],
     startTime: '14:00',
     endTime: '23:15',
-    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     days: [1, 2, 3, 4, 5],
-    overtime: [0, 0, 0, 0, 0],
+    overtime: [0, 0, 0, 0, 0, 0],
   },
   {
     title: 'M-F 4:00pm A 1:00am',
@@ -46,9 +46,9 @@ const shifts = [
     breaks: [['20:00', '21:00']],
     startTime: '16:00',
     endTime: '01:00',
-    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     days: [1, 2, 3, 4, 5],
-    overtime: [0, 0, 0, 0, 0],
+    overtime: [0, 0, 0, 0, 0, 0],
   },
   {
     title: 'M-F 9:15pm A 6:15am',
@@ -56,9 +56,9 @@ const shifts = [
     breaks: [['13:30', '14:00'], ['04:30', ['05:00']]],
     startTime: '21:15',
     endTime: '06:15',
-    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    daysTitle: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     days: [1, 2, 3, 4, 5],
-    overtime: [0, 0, 0, 0, 0],
+    overtime: [0, 0, 0, 0, 0, 0],
   },
 ]
 

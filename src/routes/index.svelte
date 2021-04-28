@@ -89,6 +89,7 @@
 		wt.setScheduleStartDate(startDate)
 
 		shiftsSelected.map(index => wt.addShift(index))
+		wt.setWorkingTimes()
 
 		orders = orders.map((order, index) => {
 			const part = catalog[order.partId] || catalog['11100']
