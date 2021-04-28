@@ -259,11 +259,10 @@
 		<th>Desired Want Date</th>
 		<th>Commodity Code</th>
 		<th>Labour-hours</th>
-		<th>Duration</th>
 		<th>Setup</th>
 	</tr>
 	{#each orders as order, index}
-		<tr class:new-day={order.newDay} class:no-part={order.missingPart}>
+		<tr class:new-day={order.newDay} class:no-part={order.missingPart} data-duration={order.duration ? order.duration.toFixed(2) : ''}>
 			<td><input type="checkbox" bind:checked={order.countHours} on:change={updateLabourHours}></td>
 			<td><input type="text" value={index+1} on:change={event => orderHandler(event, index)}></td>
 			<td>{order.baseId}</td>
@@ -275,7 +274,6 @@
 			<td>{order.desiredWantDate.toLocaleString()}</td>
 			<td>{order.code}</td>
 			<td>{order.laborHours ? order.laborHours.toFixed(2) : ''}</td>
-			<td>{order.duration ? order.duration.toFixed(2) : ''}</td>
 			<td>{order.setup !== undefined ? order.setup : ''}</td>
 		</tr>
 	{/each}

@@ -1,4 +1,6 @@
-import { shifts } from './shifts'
+import {
+  shifts
+} from './shifts'
 
 class WorkingTimes {
   constructor() {
@@ -8,9 +10,11 @@ class WorkingTimes {
     this.shifts = []
     this.events = []
     this.currentShift = 0
+    this.currentSlot = 0
   }
 
   setScheduleStartDate(date) {
+    this.currentSlot = new Date(date).getDay()
     this.scheduleStartDate = date
   }
 
@@ -22,13 +26,36 @@ class WorkingTimes {
     return this.shifts[this.currentShift]
   }
 
+  getCurrentSlot() {
+    return this.currentSlot
+  }
+
+  getWorkingTimes() {
+    const workingTimes = []
+    const weekDays = [0, 1, 2, 3, 4, 5, 6]
+
+    weekDays.forEach(day => {
+      this.shifts.forEach(shift => {
+        const {
+          startTime,
+          endTime
+        } = shift
+        if (shift.days.includes(day)) {
+          workingTimes.push([day, startTime, endTime])
+        }
+
+      })
+    })
+
+    return workingTimes
+  }
+
   getStartDate(setup) {
     let startDate = null
-
     const shift = this.getCurrentShift()
 
     if (!this.events.length) {
-      startDate = new Date(`${this.scheduleStartDate} ${shift.startTime}`)      
+      startDate = new Date(`${this.scheduleStartDate} ${shift.startTime}`)
     } else {
       startDate = new Date(this.endDate)
     }
@@ -38,8 +65,8 @@ class WorkingTimes {
     endDate.setHours(endDate.getHours() + setup)
     let hoursLeft = setup
 
-    while(hoursLeft > 0) {
-      if (endDate < endShift) { 
+    while (hoursLeft > 0) {
+      if (endDate < endShift) {
         startDate = endDate
         hoursLeft = 0
       } else if (endDate - endShift === 0) {
@@ -48,7 +75,7 @@ class WorkingTimes {
         hoursLeft = 0
       } else {
         hoursLeft -= (endShift - startDate) / 1000 / 3600
-        
+
         endDate = new Date(`${endShift.toISOString().split('T')[0]} ${shift.startTime}`)
         endDate.setDate(endDate.getDate() + 1)
         endDate.setHours(endDate.getHours() + hoursLeft)
@@ -74,7 +101,7 @@ class WorkingTimes {
 
     nextDate.setDate(nextDate.getDate() + 1)
 
-    while(!this.isWorkableDay(nextDate)) {
+    while (!this.isWorkableDay(nextDate)) {
       nextDate.setDate(nextDate.getDate() + 1)
     }
 
@@ -85,19 +112,19 @@ class WorkingTimes {
     const shift = this.getCurrentShift()
     let endShift = new Date(`${this.startDate.toISOString().split('T')[0]} ${shift.endTime}`)
     let startShift = new Date(this.startDate)
-    
+
     let endDate = new Date(this.startDate)
 
-    endDate.setHours(endDate.getHours() +  duration)
+    endDate.setHours(endDate.getHours() + duration)
     let hoursLeft = duration
-    
-    while(hoursLeft > 0) {
+
+    while (hoursLeft > 0) {
       if (endDate <= endShift) {
         this.endDate = endDate
         hoursLeft = 0
       } else {
         hoursLeft -= (endShift - startShift) / 1000 / 3600
-        
+
         endDate = this.getNextAvailableDay(endShift)
 
         endShift = new Date(`${endDate.toISOString().split('T')[0]} ${shift.endTime}`)
@@ -125,7 +152,7 @@ class WorkingTimes {
 
     return {
       startDate,
-      endDate 
+      endDate
     }
   }
 
@@ -134,7 +161,7 @@ class WorkingTimes {
   }
 
   print() {
-    console.log('shifts', this.shifts)
+    this.shifts.forEach(shift => console.log(shift))
     console.log('scheduleStartDate', this.scheduleStartDate)
     console.log('startDate', this.startDate)
     console.log('events', this.events)
