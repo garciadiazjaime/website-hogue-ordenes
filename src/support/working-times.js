@@ -111,12 +111,28 @@ class WorkingTimes {
   }
 
   getStartDate(setup) {
+    const startDate = this.calculateStartEndDate(setup, this.endDate)
+
+    this.startDate = new Date(startDate)
+
+    return startDate
+  }
+
+  getEndDate(duration) {
+    const endDate = this.calculateStartEndDate(duration, this.startDate)
+
+    this.endDate = new Date(endDate)
+
+    return endDate
+  }
+
+  calculateStartEndDate(duration, date) {
     let [ , , endTime] = this.getCurrentSlot()
 
-    let startDate = new Date(this.endDate)
+    let startDate = new Date(date)
     let endDate = null
 
-    let hoursLeft = setup
+    let hoursLeft = duration
     let endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
 
     if (!hoursLeft) {
@@ -130,7 +146,7 @@ class WorkingTimes {
         endDate = new Date(startDate)
         endDate.setHours(endDate.getHours() + hoursLeft)
       }
-
+      
       hoursLeft -= slotTime
 
       if (hoursLeft >= 0) {
@@ -149,45 +165,6 @@ class WorkingTimes {
         }
       }
     }
-
-    this.startDate = new Date(endDate)
-
-    return endDate
-  }
-
-  getEndDate(duration) {
-    let [ , , endTime] = this.getCurrentSlot()
-
-    let startDate = new Date(this.startDate)
-    let endDate = null
-
-    let hoursLeft = duration
-    let endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
-
-    while (hoursLeft > 0) {
-      const slotTime = (endSlot - startDate) / 1000 / 3600
-
-      if (hoursLeft < slotTime) {
-        endDate = new Date(startDate)
-        endDate.setHours(endDate.getHours() + hoursLeft)
-      }
-      
-      hoursLeft -= slotTime
-
-      if (hoursLeft > 0) {
-        let [[, startTime, endTime], isNextDay] = this.getNextSlot()
-
-        startDate = new Date(`${startDate.toISOString().split('T')[0]} ${startTime}`)
-        startDate.setDate(startDate.getDate() + isNextDay)
-
-        endSlot = new Date(`${startDate.toISOString().split('T')[0]} ${endTime}`)
-        if (endSlot < startDate) {
-          endSlot.setDate(endSlot.getDate() + 1)
-        }
-      }
-    }
-
-    this.endDate = endDate
 
     return endDate
   }

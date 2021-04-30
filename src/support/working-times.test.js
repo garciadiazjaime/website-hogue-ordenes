@@ -199,7 +199,7 @@ describe('working-times', () => {
           "setup": 0,
           "startDate": new Date("2021-04-16T11:00:00.000Z"),
           "endDate": new Date("2021-04-16T23:00:00.000Z"),
-        }, ]
+        }]
 
         expect(wt.getEvents()).toEqual(output)
       })
@@ -229,6 +229,56 @@ describe('working-times', () => {
         [5, "6:00", "16:00"],
         [5, "21:15", "06:15"]
       ])
+    })
+  })
+
+  describe('Error case [https://trello.com/c/3JeCvpmn]', () => {
+    it('generates end instead of null value', () => {
+      const dateFriday = '04/30/2021'
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateFriday)
+      wt.addShift(0)
+      wt.setWorkingTimes()
+
+      const events = [{
+          duration: 85.20,
+          setup: 0
+        },
+        {
+          duration: 85.20,
+          setup: 1.33
+        },
+        {
+          duration: 18,
+          setup: 1.33
+        }
+      ]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [
+        {
+          "duration": 85.2,
+          "setup": 0,
+          "startDate": new Date("2021-04-30T11:00:00.000Z"),
+          "endDate": new Date("2021-05-12T16:00:00.000Z"),
+        },
+        {
+          "duration": 85.2,
+          "setup": 1.33,
+          "startDate": new Date("2021-05-12T17:00:00.000Z"),
+          "endDate": new Date("2021-05-25T12:00:00.000Z"),
+        },
+        {
+          "duration": 18,
+          "setup": 1.33,
+          "startDate": new Date("2021-05-25T13:00:00.000Z"),
+          "endDate": new Date("2021-05-27T11:00:00.000Z"),
+        }
+      ]
+
+      expect(wt.getEvents()).toEqual(output)
     })
   })
 })
