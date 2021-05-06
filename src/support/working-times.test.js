@@ -22,7 +22,7 @@ describe('working-times', () => {
         "duration": 8,
         "setup": 0,
         "startDate": new Date("2021-04-14T11:00:00.000Z"),
-        "endDate": new Date("2021-04-14T19:00:00.000Z"),
+        "endDate": new Date("2021-04-14T20:00:00.000Z"),
       }]
 
       expect(wt.getEvents()).toEqual(output)
@@ -49,7 +49,7 @@ describe('working-times', () => {
         "duration": 16,
         "setup": 0,
         "startDate": new Date("2021-04-14T11:00:00.000Z"),
-        "endDate": new Date("2021-04-15T17:00:00.000Z"),
+        "endDate": new Date("2021-04-15T18:30:00.000Z"),
       }]
 
       expect(wt.getEvents()).toEqual(output)
@@ -75,8 +75,8 @@ describe('working-times', () => {
       const output = [{
         "duration": 6,
         "setup": 12,
-        "startDate": new Date("2021-04-15T13:00:00.000Z"),
-        "endDate": new Date("2021-04-15T19:00:00.000Z"),
+        "startDate": new Date("2021-04-15T14:00:00.000Z"),
+        "endDate": new Date("2021-04-15T21:00:00.000Z"),
       }]
 
       expect(wt.getEvents()).toEqual(output)
@@ -108,13 +108,13 @@ describe('working-times', () => {
           "duration": 8,
           "setup": 0,
           "startDate": new Date("2021-04-14T11:00:00.000Z"),
-          "endDate": new Date("2021-04-14T19:00:00.000Z"),
+          "endDate": new Date("2021-04-14T20:00:00.000Z"),
         },
         {
           "duration": 6,
           "setup": 2,
-          "startDate": new Date("2021-04-15T11:00:00.000Z"),
-          "endDate": new Date("2021-04-15T17:00:00.000Z"),
+          "startDate": new Date("2021-04-15T12:00:00.000Z"),
+          "endDate": new Date("2021-04-15T18:30:00.000Z"),
         },
       ]
 
@@ -134,16 +134,16 @@ describe('working-times', () => {
       const events = [{
         duration: 31,
         setup: 5
-      }, ]
+      }]
 
       events.forEach((event) => wt.addEvent(event))
 
       const output = [{
         "duration": 31,
         "setup": 5,
-        "startDate": new Date("2021-04-13T16:00:00.000Z"),
-        "endDate": new Date("2021-04-16T17:00:00.000Z"),
-      }, ]
+        "startDate": new Date("2021-04-13T16:30:00.000Z"),
+        "endDate": new Date("2021-04-16T21:00:00.000Z"),
+      }]
 
       expect(wt.getEvents()).toEqual(output)
     })
@@ -169,7 +169,7 @@ describe('working-times', () => {
         "duration": 12,
         "setup": 0,
         "startDate": new Date("2021-04-16T11:00:00.000Z"),
-        "endDate": new Date("2021-04-19T13:00:00.000Z"),
+        "endDate": new Date("2021-04-19T14:00:00.000Z"),
       }]
 
       expect(wt.getEvents()).toEqual(output)
@@ -198,7 +198,7 @@ describe('working-times', () => {
           "duration": 12,
           "setup": 0,
           "startDate": new Date("2021-04-16T11:00:00.000Z"),
-          "endDate": new Date("2021-04-16T23:00:00.000Z"),
+          "endDate": new Date("2021-04-17T00:00:00.000Z"),
         }]
 
         expect(wt.getEvents()).toEqual(output)
@@ -214,20 +214,21 @@ describe('working-times', () => {
       wt.setWorkingTimes()
 
       expect(wt.getWorkingTimes()).toEqual([
-        [1, "6:00", "16:00"],
-        [1, "21:15", "06:15"],
-
-        [2, "6:00", "16:00"],
-        [2, "21:15", "06:15"],
-
-        [3, "6:00", "16:00"],
-        [3, "21:15", "06:15"],
-
-        [4, "6:00", "16:00"],
-        [4, "21:15", "06:15"],
-
-        [5, "6:00", "16:00"],
-        [5, "21:15", "06:15"]
+        [ 1, '6:00', '10:00' ],  [ 1, '10:30', '14:00' ],
+        [ 1, '14:30', '16:00' ], [ 1, '21:15', '01:30' ],
+        [ 2, '02:00', '04:30' ], [ 2, '05:00', '06:15' ],
+        [ 2, '6:00', '10:00' ],  [ 2, '10:30', '14:00' ],
+        [ 2, '14:30', '16:00' ], [ 2, '21:15', '01:30' ],
+        [ 3, '02:00', '04:30' ], [ 3, '05:00', '06:15' ],
+        [ 3, '6:00', '10:00' ],  [ 3, '10:30', '14:00' ],
+        [ 3, '14:30', '16:00' ], [ 3, '21:15', '01:30' ],
+        [ 4, '02:00', '04:30' ], [ 4, '05:00', '06:15' ],
+        [ 4, '6:00', '10:00' ],  [ 4, '10:30', '14:00' ],
+        [ 4, '14:30', '16:00' ], [ 4, '21:15', '01:30' ],
+        [ 5, '02:00', '04:30' ], [ 5, '05:00', '06:15' ],
+        [ 5, '6:00', '10:00' ],  [ 5, '10:30', '14:00' ],
+        [ 5, '14:30', '16:00' ], [ 5, '21:15', '01:30' ],
+        [ 6, '02:00', '04:30' ], [ 6, '05:00', '06:15' ]
       ])
     })
   })
@@ -262,19 +263,50 @@ describe('working-times', () => {
           "duration": 85.2,
           "setup": 0,
           "startDate": new Date("2021-04-30T11:00:00.000Z"),
-          "endDate": new Date("2021-05-12T16:00:00.000Z"),
+          "endDate": new Date("2021-05-13T15:42:00.000Z"),
         },
         {
           "duration": 85.2,
           "setup": 1.33,
-          "startDate": new Date("2021-05-12T17:00:00.000Z"),
-          "endDate": new Date("2021-05-25T12:00:00.000Z"),
+          "startDate": new Date("2021-05-13T17:01:00.000Z"),
+          "endDate": new Date("2021-05-27T11:43:00.000Z"),
         },
         {
           "duration": 18,
           "setup": 1.33,
-          "startDate": new Date("2021-05-25T13:00:00.000Z"),
-          "endDate": new Date("2021-05-27T11:00:00.000Z"),
+          "startDate": new Date("2021-05-27T13:02:00.000Z"),
+          "endDate": new Date("2021-05-31T13:02:00.000Z"),
+        }
+      ]
+
+      expect(wt.getEvents()).toEqual(output)
+    })
+  })
+
+  describe('Error case [https://trello.com/c/3JeCvpmn]', () => {
+    it('generates expected end date', () => {
+      const dateMonday = '05/10/2021'
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateMonday)
+      wt.addShift(0)
+      wt.addShift(5)
+      wt.setWorkingTimes()
+
+      const events = [{
+          duration: 85.20,
+          setup: 0
+        },
+      ]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [
+        {
+          "duration": 85.2,
+          "setup": 0,
+          "startDate": new Date("2021-05-10T11:00:00.000Z"),
+          "endDate": new Date("2021-05-17T11:12:00.000Z"),
         }
       ]
 
