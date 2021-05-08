@@ -208,27 +208,45 @@ describe('working-times', () => {
 
   describe('when a shift is added', () => {
     it('updtes working times', () => {
+      const dateFriday = '5/7/2021'
+
       const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateFriday)
       wt.addShift(0)
       wt.addShift(5)
       wt.setWorkingTimes()
 
       expect(wt.getWorkingTimes()).toEqual([
-        [ 1, '6:00', '10:00' ],  [ 1, '10:30', '14:00' ],
-        [ 1, '14:30', '16:00' ], [ 1, '21:15', '01:30' ],
-        [ 2, '02:00', '04:30' ], [ 2, '05:00', '06:15' ],
-        [ 2, '6:00', '10:00' ],  [ 2, '10:30', '14:00' ],
-        [ 2, '14:30', '16:00' ], [ 2, '21:15', '01:30' ],
-        [ 3, '02:00', '04:30' ], [ 3, '05:00', '06:15' ],
-        [ 3, '6:00', '10:00' ],  [ 3, '10:30', '14:00' ],
-        [ 3, '14:30', '16:00' ], [ 3, '21:15', '01:30' ],
-        [ 4, '02:00', '04:30' ], [ 4, '05:00', '06:15' ],
-        [ 4, '6:00', '10:00' ],  [ 4, '10:30', '14:00' ],
-        [ 4, '14:30', '16:00' ], [ 4, '21:15', '01:30' ],
-        [ 5, '02:00', '04:30' ], [ 5, '05:00', '06:15' ],
-        [ 5, '6:00', '10:00' ],  [ 5, '10:30', '14:00' ],
-        [ 5, '14:30', '16:00' ], [ 5, '21:15', '01:30' ],
-        [ 6, '02:00', '04:30' ], [ 6, '05:00', '06:15' ]
+        [5, '6:00', '10:00'],
+        [5, '10:30', '14:00'],
+        [5, '14:30', '16:00'],
+        [5, '21:15', '01:30'],
+        [6, '02:00', '04:30'],
+        [6, '05:00', '06:15'],
+        [1, '6:00', '10:00'],
+        [1, '10:30', '14:00'],
+        [1, '14:30', '16:00'],
+        [1, '21:15', '01:30'],
+        [2, '02:00', '04:30'],
+        [2, '05:00', '06:15'],
+        [2, '6:00', '10:00'],
+        [2, '10:30', '14:00'],
+        [2, '14:30', '16:00'],
+        [2, '21:15', '01:30'],
+        [3, '02:00', '04:30'],
+        [3, '05:00', '06:15'],
+        [3, '6:00', '10:00'],
+        [3, '10:30', '14:00'],
+        [3, '14:30', '16:00'],
+        [3, '21:15', '01:30'],
+        [4, '02:00', '04:30'],
+        [4, '05:00', '06:15'],
+        [4, '6:00', '10:00'],
+        [4, '10:30', '14:00'],
+        [4, '14:30', '16:00'],
+        [4, '21:15', '01:30'],
+        [5, '02:00', '04:30'],
+        [5, '05:00', '06:15']
       ])
     })
   })
@@ -258,8 +276,7 @@ describe('working-times', () => {
 
       events.forEach((event) => wt.addEvent(event))
 
-      const output = [
-        {
+      const output = [{
           "duration": 85.2,
           "setup": 0,
           "startDate": new Date("2021-04-30T11:00:00.000Z"),
@@ -294,21 +311,46 @@ describe('working-times', () => {
       wt.setWorkingTimes()
 
       const events = [{
-          duration: 85.20,
-          setup: 0
-        },
-      ]
+        duration: 85.20,
+        setup: 0
+      }]
 
       events.forEach((event) => wt.addEvent(event))
 
-      const output = [
-        {
-          "duration": 85.2,
-          "setup": 0,
-          "startDate": new Date("2021-05-10T11:00:00.000Z"),
-          "endDate": new Date("2021-05-17T11:12:00.000Z"),
-        }
-      ]
+      const output = [{
+        "duration": 85.2,
+        "setup": 0,
+        "startDate": new Date("2021-05-10T11:00:00.000Z"),
+        "endDate": new Date("2021-05-17T11:12:00.000Z"),
+      }]
+
+      expect(wt.getEvents()).toEqual(output)
+    })
+  })
+
+  describe('https://trello.com/c/7eUJIQmA', () => {
+    it('generates expected end date', () => {
+      const dateFriday = '5/7/2021'
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateFriday)
+      wt.addShift(0)
+      wt.addShift(5)
+      wt.setWorkingTimes()
+
+      const events = [{
+        duration: 15.05,
+        setup: 0
+      }]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [{
+        "duration": 15.05,
+        "setup": 0,
+        "startDate": new Date("2021-05-07T11:00:00.000Z"),
+        "endDate": new Date("2021-05-08T08:48:00.000Z"),
+      }]
 
       expect(wt.getEvents()).toEqual(output)
     })

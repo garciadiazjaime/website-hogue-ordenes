@@ -28,6 +28,16 @@ function getDay(day, startTime, shiftStartTime) {
   return startDate >= shiftStartDate ? day : day + 1
 }
 
+const weekDays = [0, 1, 2, 3, 4, 5, 6]
+
+function getWorkDays(date) {
+  const startDay = new Date(date).getDay()
+
+  const index = weekDays.indexOf(startDay)
+
+  return [...weekDays.slice(index), ...weekDays.slice(0, startDay)]
+}
+
 class WorkingTimes {
   constructor() {
     this.scheduleStartDate = null
@@ -47,6 +57,10 @@ class WorkingTimes {
 
   addShift(type) {
     this.shifts.push(shifts[type])
+  }
+
+  getScheduleStartDate() {
+    return this.scheduleStartDate
   }
 
   getCurrentShift() {
@@ -70,9 +84,9 @@ class WorkingTimes {
 
   setWorkingTimes() {
     const workingTimes = []
-    const weekDays = [0, 1, 2, 3, 4, 5, 6]
+    const workDays = getWorkDays(this.getScheduleStartDate())
 
-    weekDays.forEach(day => {
+    workDays.forEach(day => {
       this.shifts.forEach(shift => {
         const {
           startTime: shiftStartTime,
@@ -145,6 +159,10 @@ class WorkingTimes {
   }
 
   calculateStartEndDate(duration, date) {
+    if (Number.isNaN(duration)) {
+      return console.log(`invalid duration: ${duration}`)
+    }
+
     let [ , , endTime] = this.getCurrentSlot()
 
     let startDate = new Date(date)
