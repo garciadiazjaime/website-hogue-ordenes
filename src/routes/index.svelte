@@ -90,7 +90,10 @@
 		wt.setScheduleStartDate(startDate)
 
 		shiftsSelected.map(index => wt.addShift(index))
-		wt.setWorkingTimes()
+		const response = wt.setWorkingTimes()
+		if (!response) {
+			return
+		}
 
 		orders = orders.map((order, index) => {
 			const part = catalog[order.partId] || catalog['11100']
@@ -99,8 +102,9 @@
 				order.missingPart = true
 			}
 
-			const duration = order.quantity / part.piecesByHour
-			order.duration = duration
+			const overtime = Number.isInteger(parseInt(order.overtime)) ? order.overtime : 0
+			const duration = (order.quantity / part.piecesByHour) - overtime
+			order.duration = duration > 0 ? duration : 0
 			order.laborHours = order.quantity * part.hrsByPiece
 
 			const setup = index > 0 || initialSetup ? part.setup : 0
@@ -262,6 +266,7 @@
 		<th>Commodity Code</th>
 		<th>Labour-hours</th>
 		<th>Setup</th>
+		<th>Overtime</th>
 	</tr>
 	{#each orders as order, index}
 		<tr class:new-day={order.newDay} class:no-part={order.missingPart} data-duration={order.duration ? order.duration.toFixed(2) : ''}>
@@ -277,6 +282,7 @@
 			<td>{order.code}</td>
 			<td>{order.laborHours ? order.laborHours.toFixed(2) : ''}</td>
 			<td>{order.setup !== undefined ? order.setup : ''}</td>
+			<td><input type="text" bind:value={order.overtime}></td>
 		</tr>
 	{/each}
 </table>

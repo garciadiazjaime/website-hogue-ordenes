@@ -66,23 +66,12 @@
     <th>Shift</th>
     <th>Shift Hours</th>
     <th>Breaks</th>
-		<th>Overtime</th>
   </tr>
 	{#each shifts as shift, index}
 	<tr>
 		<td>{index+1}</td>
 		<td>{shift.title}</td>
 		<td>{shift.breaksTitle}</td>
-		<td>
-			<table>
-				{#each shift.overtime as overtime, index}
-					<tr>
-						<th>{shift.daysTitle[index]}</th>
-						<td><input type="text" bind:value={overtime}></td>
-					</tr>
-				{/each}
-			</table>
-		</td>
 	</tr>
 	{/each}
 </table>

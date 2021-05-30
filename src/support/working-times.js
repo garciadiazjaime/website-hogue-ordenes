@@ -114,9 +114,15 @@ class WorkingTimes {
       return accu
     }, undefined)
 
+    if (!Number.isInteger(this.currentSlot)) {
+      return alert('Invalid Start Date')
+    }
+
     this.startDate = new Date(`${this.scheduleStartDate} ${this.workingTimes[this.currentSlot][1]}`)
     this.endDate = new Date(this.startDate)
     this.currentDay = this.currentSlot[0]
+
+    return true
   }
 
   getWorkingTimes() {
@@ -201,13 +207,13 @@ class WorkingTimes {
     return endDate
   }
 
-  addEvent(event) {
-    const startDate = this.getStartDate(event.setup)
-    const endDate = this.getEndDate(event.duration)
+  addEvent({ duration, setup }) {
+    const startDate = this.getStartDate(setup)
+    const endDate = this.getEndDate(duration)
 
     this.events.push({
-      duration: event.duration,
-      setup: event.setup,
+      duration,
+      setup,
       startDate,
       endDate
     })
