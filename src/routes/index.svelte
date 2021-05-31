@@ -14,15 +14,10 @@
 	let initialSetup = null
 	const shift = [true, false, false, false]
 
+	let activeTab = 0
+
 	onMount(async () => {
-		const schedule = localStorage.getItem('schedule');
-		if (schedule) {
-			orders = JSON.parse(schedule).map(item => ({
-				...item,
-				desiredRIsDate: item.desiredRIsDate ? new Date(item.desiredRIsDate): '',
-				desiredWantDate: item.desiredWantDate ? new Date(item.desiredWantDate) : '',
-			}))
-		}
+		loadSchedule(activeTab)
 
 		const data = localStorage.getItem('catalog')
 		if (data) {
@@ -33,6 +28,19 @@
 			}, {})
 		}
 	});
+
+	function loadSchedule(index) {
+		const schedule = localStorage.getItem(`schedule_${index}`);
+		orders = []
+
+		if (schedule) {
+			orders = JSON.parse(schedule).map(item => ({
+				...item,
+				desiredRIsDate: item.desiredRIsDate ? new Date(item.desiredRIsDate): '',
+				desiredWantDate: item.desiredWantDate ? new Date(item.desiredWantDate) : '',
+			}))
+		}
+	}
 
 	async function fileHandler(event) {
 		const response = await readXlsxFile(event.target.files[0], { sheet: 1 })
@@ -64,9 +72,14 @@
 	}
 
 	function saveHandler(event) {
-		localStorage.setItem('schedule', JSON.stringify(orders));
+		localStorage.setItem(`schedule_${activeTab}`, JSON.stringify(orders));
 
 		alert('Schedule saved')
+	}
+
+	function tabHandler(event, index) {
+		activeTab = index
+		loadSchedule(activeTab)
 	}
 
 	function generateSchedule() {
@@ -184,6 +197,29 @@
 	input[type=checkbox] {
 		transform: scale(2);
 	}
+
+	ul.tabs {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		width: 100%;
+		overflow-x: scroll;
+	}
+
+	ul.tabs li{
+		padding: 12px 24px;
+		border: 1px solid #deeced;
+		text-align: center;
+	}
+
+	ul.tabs li:hover{
+		cursor: pointer;
+	}
+
+	ul.tabs li.active {
+		background-color: #deeced;
+	}
 </style>
 
 <svelte:head>
@@ -251,6 +287,12 @@
 </table>
 
 <br />
+
+<ul class="tabs">
+	{#each Array(30) as tab, index}
+	<li class:active={activeTab == index} on:click={(event) => tabHandler(event, index)}>{index + 1}</li>
+	{/each}
+</ul>
 
 <table class="orders">
 	<tr>
