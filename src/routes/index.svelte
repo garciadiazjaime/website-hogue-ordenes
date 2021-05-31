@@ -1,9 +1,10 @@
 <script>
 	import { onMount } from 'svelte';
+	import readXlsxFile from 'read-excel-file'
 
 	import { shifts as shiftsData } from '../support/shifts'
 	import WorkingTimes from '../support/working-times'
-	import { exportCSVFile } from '../support/csv'
+	import { exportCSVFile, csvJSON } from '../support/csv'
 
 	let orders = []
 	let catalog
@@ -29,6 +30,39 @@
 		}
 	});
 
+	function cellsMapper(row) {
+		return {
+			baseId: row[1],
+			partId: row[4],
+			description: row[6],
+			status: row[7],
+			quantity: row[8],
+			desiredRIsDate: '',
+			desiredWantDate: '',
+			code: row[11],
+		}
+	}
+
+	async function readXLSX(event) {
+		const skipHeaders = true
+		const response = await readXlsxFile(event.target.files[0], { sheet: 1 })
+
+		return response.slice(skipHeaders && 1).map(cellsMapper)
+	}
+
+	async function readCSV(event) {
+		return new Promise(resolve => {
+			const reader = new FileReader();
+			
+			reader.onload = function () {
+				const data = csvJSON(reader.result)
+				resolve(data.map(cellsMapper));
+			};
+			
+			reader.readAsBinaryString(event.target.files[0]);
+		})
+	}
+
 	function loadSchedule(index) {
 		const schedule = localStorage.getItem(`schedule_${index}`);
 		orders = []
@@ -43,19 +77,10 @@
 	}
 
 	async function fileHandler(event) {
-		const response = await readXlsxFile(event.target.files[0], { sheet: 1 })
+		const [, extension] = event.target.files[0].name.split('.')
 
-		const skipHeaders = true
-		orders = response.slice(skipHeaders && 1).map((row) => ({
-			baseId: row[1],
-			partId: row[4],
-			description: row[6],
-			status: row[7],
-			quantity: row[8],
-			desiredRIsDate: '',
-			desiredWantDate: '',
-			code: row[11],
-		}))
+		const reader = extension === 'csv' ? readCSV : readXLSX
+		orders = await reader(event)
 
 		event.target.value = ''
 	}

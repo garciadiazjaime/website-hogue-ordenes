@@ -77,6 +77,30 @@ function exportCSVFile(orders, index) {
   }
 }
 
+function csvJSON(csv) {
+  const rows = csv.split("\n");
+  const result = [];
+  const headers = rows[0].split(",");
+
+  for (let i = 1; i < rows.length; i++) {
+    const item = [];
+    const cells = rows[i].split(",");
+
+    if (!cells[1]) {
+      continue
+    }
+
+    for (var j = 0; j < headers.length; j++) {
+      item.push(cells[j]);
+    }
+
+    result.push(item);
+  }
+
+  return result
+}
+
 export {
-  exportCSVFile
+  exportCSVFile,
+  csvJSON
 }
