@@ -1,12 +1,13 @@
 {
-  "name": "TODO",
-  "description": "TODO",
+  "name": "hogue-schedule",
+  "description": "tool to generate schedule",
   "version": "0.0.1",
   "scripts": {
     "dev": "sapper dev",
     "build": "sapper build --legacy",
     "export": "sapper export --legacy",
-    "start": "node __sapper__/build"
+    "start": "node __sapper__/build",
+    "test": "npx jest"
   },
   "dependencies": {
     "compression": "^1.7.1",
@@ -26,6 +27,7 @@
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-replace": "^2.4.0",
     "@rollup/plugin-url": "^5.0.0",
+    "babel-jest": "^27.0.2",
     "jest": "^26.6.3",
     "rollup": "^2.3.4",
     "rollup-plugin-svelte": "^7.0.0",
