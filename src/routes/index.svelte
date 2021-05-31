@@ -8,9 +8,8 @@
 
 	let orders = []
 	let catalog
-	let holidays = []
 
-	let startDate = new Date().toLocaleDateString()
+	let startDate
 	let totalLabourHours = 0
 	let initialSetup = null
 	const shift = [true, false, false, false]
@@ -120,6 +119,10 @@
 			return alert('Please select at least one shift.')
 		}
 
+		if (!startDate) {
+			return alert('Set a Start Date')
+		}
+
 		const shiftsSelected = shift.reduce((accu, item, index) => {
 			if (item) {
 				accu.push(index)
@@ -129,7 +132,9 @@
 		}, [])
 
 		const wt = new WorkingTimes()
-		wt.setScheduleStartDate(startDate)
+		const [year, month, day] = startDate.split('-')
+    const adjustedDate = `${month}/${day}/${year}`
+		wt.setScheduleStartDate(adjustedDate)
 
 		shiftsSelected.map(index => wt.addShift(index))
 		const response = wt.setWorkingTimes()
@@ -175,7 +180,7 @@
 
 <style>
 	h1 {
-		font-size: 2.8em;
+		font-size: 2.4em;
 		font-weight: 700;
 		margin: 0 0 0.5em 0;
 		text-align: center;
@@ -249,6 +254,42 @@
 	ul.tabs li.active {
 		background-color: #deeced;
 	}
+
+	.controls {
+		margin-bottom: 20px
+	}
+
+	.controls > div{
+		display: flex;
+		border-bottom: 1px solid #deeced;
+	}
+
+	.controls > div:last-child {
+		border: none;
+	}
+
+	.controls span {
+		display: block;
+	}
+
+	.controls p{
+		text-align: center;
+		flex: 1;
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	label {
+		border: 1px solid rgb(133, 133, 133);
+    background-color: rgb(239, 239, 239);
+		color: black;
+		height: 37px;
+		line-height: 37px;
+		width: 203px;
+		display: inline-block;
+	}
 </style>
 
 <svelte:head>
@@ -257,66 +298,46 @@
 
 <h1>Production Schedule</h1>
 
-<input type="file" on:change={fileHandler}>
+<div class="controls">
+	<div>
+		{#each shiftsData as shift, index}
+			<p>
+				<span>{shiftsData[index].title}</span>
+				<input type="checkbox" bind:checked={shift[index]} value={index+1}> 
+			</p>
+		{/each}
+	</div>
 
-<table>
-	<tr>
-		<th>Shift</th>
-		<td>
-			<table>
-				<tr>
-					{#each shiftsData as shift, index}
-					<th>#{index + 1} <br />{shift.title}</th>
-					{/each}
-				</tr>
-				<tr>
-					<td><input type="checkbox" bind:checked={shift[0]} value="1"></td>
-					<td><input type="checkbox" bind:checked={shift[1]} value="2"></td>
-					<td><input type="checkbox" bind:checked={shift[2]} value="3"></td>
-					<td><input type="checkbox" bind:checked={shift[3]} value="4"></td>
-					<td><input type="checkbox" bind:checked={shift[4]} value="5"></td>
-					<td><input type="checkbox" bind:checked={shift[5]} value="6"></td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-	<tr>
-		<th>Start Date</th>
-		<td>
-			<input type="input" bind:value={startDate}>
-		</td>
-	</tr>
-	<tr>
-		<th>Holidays</th>
-		<td>
-			<input type="text" bind:value={holidays[0]}>
-			<input type="text" bind:value={holidays[1]}>
-			<input type="text" bind:value={holidays[2]}>
-		</td>
-	</tr>
-	<tr>
-		<th>Initial Setup</th>
-		<td>
-			<input type="checkbox" bind:checked={initialSetup}>
-		</td>
-	</tr>
-	<tr>
-		<th>Total Labour Hours</th>
-		<td>
-			{totalLabourHours.toFixed(2)}
-		</td>
-	</tr>
-	<tr>
-		<th></th>
-		<td>
+	<div>
+		<p>
+			<input type="file" on:change={fileHandler} id="file" class="hidden">
+			<span>Import</span>
+			<label for="file">Select file</label>
+		</p>
+		<p>
+			<span>Start Date</span> <input type="date" bind:value={startDate}>
+		</p>
+		<p>
+			<span>Initial Setup</span> <input type="checkbox" bind:checked={initialSetup}>
+		</p>
+		<p>
+			<span>Total Labour Hours</span> {totalLabourHours.toFixed(2)}
+		</p>
+	</div>
+
+	<div>
+		<p>
 			<input type="submit" value="Generate Schedule" on:click={generateSchedule}>
+		</p>
+		<p>
 			<input type="submit" value="Save" on:click={saveHandler}>
+		</p>
+		<p>
 			<input type="submit" value="Export" on:click={exportHandler}>
-		</td>
-	</tr>
-</table>
-
-<br />
+		</p>
+		<p></p>
+	</div>
+</div>
 
 <ul class="tabs">
 	{#each Array(30) as tab, index}
