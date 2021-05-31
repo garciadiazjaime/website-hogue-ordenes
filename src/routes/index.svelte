@@ -1,9 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
-	import readXlsxFile from 'read-excel-file'
 
 	import { shifts as shiftsData } from '../support/shifts'
 	import WorkingTimes from '../support/working-times'
+	import { exportCSVFile } from '../support/csv'
 
 	let orders = []
 	let catalog
@@ -75,6 +75,10 @@
 		localStorage.setItem(`schedule_${activeTab}`, JSON.stringify(orders));
 
 		alert('Schedule saved')
+	}
+
+	function exportHandler() {
+		exportCSVFile(orders, activeTab)
 	}
 
 	function tabHandler(event, index) {
@@ -282,6 +286,7 @@
 		<td>
 			<input type="submit" value="Generate Schedule" on:click={generateSchedule}>
 			<input type="submit" value="Save" on:click={saveHandler}>
+			<input type="submit" value="Export" on:click={exportHandler}>
 		</td>
 	</tr>
 </table>

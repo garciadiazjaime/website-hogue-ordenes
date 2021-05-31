@@ -1,10 +1,11 @@
 <script>
 	function cleanHandler() {
     if (confirm('are you sure? this is going to delete all changes')) {
-      localStorage.removeItem('schedule');
+			for(let i=0; i<30; i++) {
+				localStorage.removeItem(`schedule_${i}`);
+			}
       localStorage.removeItem('catalog');
       localStorage.removeItem('shifts');
-      alert('done')
     }
 	}
 </script>
