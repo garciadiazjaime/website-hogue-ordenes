@@ -12,7 +12,7 @@
 	let startDate
 	let totalLabourHours = 0
 	let initialSetup = null
-	const shift = [true, false, false, false]
+	const shift = [true, false, false, false, false, false]
 
 	let activeTab = 0
 
@@ -120,7 +120,7 @@
 		}
 
 		if (!startDate) {
-			return alert('Set a Start Date')
+			return alert('Please set a Start Date')
 		}
 
 		const shiftsSelected = shift.reduce((accu, item, index) => {
@@ -130,6 +130,10 @@
 
 			return accu
 		}, [])
+
+		if (!shiftsSelected.length) {
+			return alert('Please select at least one shift')
+		}
 
 		const wt = new WorkingTimes()
 		const [year, month, day] = startDate.split('-')
@@ -300,7 +304,7 @@
 
 <div class="controls">
 	<div>
-		{#each shiftsData as shift, index}
+		{#each shiftsData as _, index}
 			<p>
 				<span>{shiftsData[index].title}</span>
 				<input type="checkbox" bind:checked={shift[index]} value={index+1}> 
