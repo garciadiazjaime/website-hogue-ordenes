@@ -22,8 +22,8 @@ function getDate(date, time) {
 
 function getDay(day, startTime, shiftStartTime) {
   const date = new Date()
-  const startDate = new Date(`${date.toISOString('T')[0]} ${startTime}`)
-  const shiftStartDate = new Date(`${date.toISOString('T')[0]} ${shiftStartTime}`)
+  const startDate = new Date(`${date.toISOString().split('T')[0]} ${startTime}`)
+  const shiftStartDate = new Date(`${date.toISOString().split('T')[0]} ${shiftStartTime}`)
 
   return startDate >= shiftStartDate ? day : day + 1
 }

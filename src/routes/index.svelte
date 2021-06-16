@@ -147,10 +147,11 @@
 		}
 
 		orders = orders.map((order, index) => {
-			const part = catalog[order.partId] || catalog['11100']
+			const part = catalog[order.partId] || {}
 
-			if (!catalog[order.partId]) {
+			if (!part || !part.piecesByHour) {
 				order.missingPart = true
+				part.piecesByHour = Infinity
 			}
 
 			const overtime = Number.isInteger(parseInt(order.overtime)) ? order.overtime : 0
