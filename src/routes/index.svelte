@@ -323,6 +323,12 @@
 			<span>Start Date</span> <input type="date" bind:value={startDate}>
 		</p>
 		<p>
+			<span>Holiday 1</span> <input type="date">
+		</p>
+		<p>
+			<span>Holiday 2</span> <input type="date">
+		</p>
+		<p>
 			<span>Initial Setup</span> <input type="checkbox" bind:checked={initialSetup}>
 		</p>
 		<p>
@@ -331,6 +337,9 @@
 	</div>
 
 	<div>
+		<p></p>
+		<p></p>
+		<p></p>
 		<p>
 			<input type="submit" value="Generate Schedule" on:click={generateSchedule}>
 		</p>
@@ -340,7 +349,6 @@
 		<p>
 			<input type="submit" value="Export" on:click={exportHandler}>
 		</p>
-		<p></p>
 	</div>
 </div>
 
