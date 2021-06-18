@@ -38,6 +38,17 @@ function getWorkDays(date) {
   return [...weekDays.slice(index), ...weekDays.slice(0, startDay)]
 }
 
+function adjustNextDayWhenSunday(startDate, isNextDay) {
+  const day = new Date(startDate)
+  day.setDate(day.getDate() + isNextDay)
+
+  if (day.getDay() === 0) {
+    return 0
+  }
+
+  return isNextDay
+}
+
 class WorkingTimes {
   constructor() {
     this.scheduleStartDate = null
@@ -72,9 +83,9 @@ class WorkingTimes {
   }
 
   getNextSlot() {
-    let [ day ] = this.getCurrentSlot()
-    const slot = (this.currentSlot + 1) % this.workingTimes.length
-    this.currentSlot = slot
+    let [day] = this.getCurrentSlot()
+    const slotIndex = (this.currentSlot + 1) % this.workingTimes.length
+    this.currentSlot = slotIndex
 
     const nextSlot = this.getCurrentSlot()
     const isNextDay = getIsNextDay(day, nextSlot[0])
@@ -169,7 +180,7 @@ class WorkingTimes {
       return console.log(`invalid duration: ${duration}`)
     }
 
-    let [ , , endTime] = this.getCurrentSlot()
+    let [, , endTime] = this.getCurrentSlot()
 
     let startDate = new Date(date)
     let endDate = null
@@ -188,13 +199,18 @@ class WorkingTimes {
         endDate = new Date(startDate)
         endDate.setMinutes(endDate.getMinutes() + (hoursLeft * 60))
       }
-      
+
       hoursLeft -= slotTime
 
       if (hoursLeft > 0) {
-        let [[, startTime, endTime], isNextDay] = this.getNextSlot()
+        let [
+          [, startTime, endTime], isNextDay
+        ] = this.getNextSlot()
 
         startDate = getDate(startDate, startTime)
+
+        isNextDay = adjustNextDayWhenSunday(startDate, isNextDay)
+
         startDate.setDate(startDate.getDate() + isNextDay)
 
         endSlot = getDate(startDate, endTime)
@@ -207,7 +223,10 @@ class WorkingTimes {
     return endDate
   }
 
-  addEvent({ duration, setup }) {
+  addEvent({
+    duration,
+    setup
+  }) {
     const startDate = this.getStartDate(setup)
     const endDate = this.getEndDate(duration)
 

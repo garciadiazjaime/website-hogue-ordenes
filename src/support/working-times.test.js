@@ -355,4 +355,40 @@ describe('working-times', () => {
       expect(wt.getEvents()).toEqual(output)
     })
   })
+
+  describe('error case', () => {
+    it('w', () => {
+      const dateFriday = '06/18/2021'
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateFriday)
+      wt.addShift(0)
+      wt.addShift(5)
+      wt.setWorkingTimes()
+
+      const events = [{
+        duration: 12,
+        setup: 0
+      }, {
+        duration: 7,
+        setup: 2
+      }]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [{
+        "duration": 12,
+        "setup": 0,
+        "startDate": new Date("2021-06-18T11:00:00.000Z"),
+        "endDate": new Date("2021-06-19T05:15:00.000Z"),
+      }, {
+        "duration": 7,
+        "setup": 2,
+        "startDate": new Date("2021-06-19T07:45:00.000Z"),
+        "endDate": new Date("2021-06-21T15:00:00.000Z"),
+      }]
+
+      expect(wt.getEvents()).toEqual(output)
+    })
+  })
 })
