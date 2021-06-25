@@ -356,8 +356,8 @@ describe('working-times', () => {
     })
   })
 
-  describe('error case', () => {
-    it('w', () => {
+  describe('https://trello.com/c/oi1GyfWQ', () => {
+    it('skips sundays', () => {
       const dateFriday = '06/18/2021'
 
       const wt = new WorkingTimes()
@@ -386,6 +386,34 @@ describe('working-times', () => {
         "setup": 2,
         "startDate": new Date("2021-06-19T07:45:00.000Z"),
         "endDate": new Date("2021-06-21T15:00:00.000Z"),
+      }]
+
+      expect(wt.getEvents()).toEqual(output)
+    })
+  })
+
+  describe('https://trello.com/c/RadBqzzq', () => {
+    it('adjusts endSlot', () => {
+      const dateTuesday = '06/22/2021'
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateTuesday)
+      wt.addShift(0)
+      wt.addShift(5)
+      wt.setWorkingTimes()
+
+      const events = [{
+        duration: 17,
+        setup: 10.5
+      }]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [{
+        "duration": 17,
+        "setup": 10.5,
+        "startDate": new Date("2021-06-23T03:45:00.000Z"),
+        "endDate": new Date("2021-06-24T03:45:00.000Z"),
       }]
 
       expect(wt.getEvents()).toEqual(output)

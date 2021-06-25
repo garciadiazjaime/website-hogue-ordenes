@@ -159,7 +159,7 @@
 			order.duration = duration > 0 ? duration : 0
 			order.laborHours = order.quantity * part.hrsByPiece
 
-			const setup = index > 0 || initialSetup ? part.setup : 0
+			const setup = 1.5 //index > 0 || initialSetup ? part.setup : 0
 
 			const { startDate, endDate }  = wt.addEvent({
 				duration,

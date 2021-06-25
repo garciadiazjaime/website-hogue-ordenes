@@ -20,6 +20,16 @@ function getDate(date, time) {
   return new Date(`${year}-${month}-${day} ${time}`)
 }
 
+function getEndSlot(date, time) {
+  const endSlot = getDate(date, time)
+
+  if (endSlot < date) {
+    endSlot.setDate(endSlot.getDate() + 1)
+  }
+
+  return endSlot
+}
+
 function getDay(day, startTime, shiftStartTime) {
   const date = new Date()
   const startDate = new Date(`${date.toISOString().split('T')[0]} ${startTime}`)
@@ -140,25 +150,6 @@ class WorkingTimes {
     return this.workingTimes
   }
 
-  isWorkableDay(date) {
-    const shift = this.getCurrentShift()
-
-    return shift.days.includes(date.getDay())
-  }
-
-  getNextAvailableDay(date) {
-    const shift = this.getCurrentShift()
-    const nextDate = getDate(date, shift.startTime)
-
-    nextDate.setDate(nextDate.getDate() + 1)
-
-    while (!this.isWorkableDay(nextDate)) {
-      nextDate.setDate(nextDate.getDate() + 1)
-    }
-
-    return nextDate
-  }
-
   getStartDate(setup) {
     const startDate = this.calculateStartEndDate(setup, this.endDate)
 
@@ -186,7 +177,7 @@ class WorkingTimes {
     let endDate = null
 
     let hoursLeft = duration
-    let endSlot = getDate(startDate, endTime)
+    let endSlot = getEndSlot(startDate, endTime)
 
     if (!hoursLeft) {
       endDate = new Date(startDate)
@@ -213,7 +204,7 @@ class WorkingTimes {
 
         startDate.setDate(startDate.getDate() + isNextDay)
 
-        endSlot = getDate(startDate, endTime)
+        endSlot = getEndSlot(startDate, endTime)
         if (endSlot < startDate) {
           endSlot.setDate(endSlot.getDate() + 1)
         }
