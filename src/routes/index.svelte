@@ -5,7 +5,9 @@
 	import { shifts as shiftsData } from '../support/shifts'
 	import WorkingTimes from '../support/working-times'
 	import { exportCSVFile, csvJSON } from '../support/csv'
+	import Loading from '../components/Loading.svelte'
 
+	let showLoading = false
 	let orders = []
 	let catalog
 
@@ -76,12 +78,14 @@
 	}
 
 	async function fileHandler(event) {
+		showLoading = true
 		const [, extension] = event.target.files[0].name.split('.')
 
 		const reader = extension === 'csv' ? readCSV : readXLSX
 		orders = await reader(event)
 
 		event.target.value = ''
+		showLoading = false
 	}
 
 	function orderHandler(event, index) {
@@ -357,6 +361,10 @@
 	<li class:active={activeTab == index} on:click={(event) => tabHandler(event, index)}>{index + 1}</li>
 	{/each}
 </ul>
+
+{#if showLoading}
+	<Loading />
+{/if}
 
 <table class="orders">
 	<tr>

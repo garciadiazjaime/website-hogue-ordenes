@@ -2,7 +2,10 @@
 	import { onMount } from 'svelte';
 	import readXlsxFile from 'read-excel-file'
 
+	import Loading from '../components/Loading.svelte'
+
 	let parts = []
+	let showLoading = false
 
 	onMount(async () => {
 		const data = localStorage.getItem('catalog');
@@ -17,6 +20,8 @@
 	}
 
 	async function fileHandler(event) {
+		showLoading = true
+
 		const sheetsTotal = await readXlsxFile(event.target.files[0], { getSheets: true }).then((sheets) => sheets)
 
 		const promises = sheetsTotal.map(async (sheet, index) => {
@@ -46,6 +51,8 @@
 
 			return accu
 		}, [])
+
+		showLoading = false
 	}
 
 	function saveHandler(event) {
@@ -102,6 +109,10 @@
 
 <input type="file" on:change={fileHandler}>
 <input type="submit" value="Save" on:click={saveHandler}>
+
+{#if showLoading}
+	<Loading />
+{/if}
 
 <table>
 	<tr>
