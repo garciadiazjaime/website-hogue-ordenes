@@ -419,4 +419,60 @@ describe('working-times', () => {
       expect(wt.getEvents()).toEqual(output)
     })
   })
+
+  describe('https://trello.com/c/oXVs0aRE', () => {
+    it('skips holidays on start date', () => {
+      const dateMonday = '07/19/2021'
+      const holidays = ['07/19/2021']
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateMonday)
+      wt.addShift(0)
+      wt.addHolidays(holidays)
+      wt.setWorkingTimes()
+
+      const events = [{
+        duration: 10,
+        setup: 0
+      }]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [{
+        "duration": 10,
+        "setup": 0,
+        "startDate": new Date("2021-07-20T11:00:00.000Z"),
+        "endDate": new Date("2021-07-21T12:00:00.000Z"),
+      }]
+
+      expect(wt.getEvents()).toEqual(output)
+    })
+
+    it('skips holidays on end date', () => {
+      const dateMonday = '07/19/2021'
+      const holidays = ['07/20/2021']
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(dateMonday)
+      wt.addShift(0)
+      wt.addHolidays(holidays)
+      wt.setWorkingTimes()
+
+      const events = [{
+        duration: 10,
+        setup: 0
+      }]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [{
+        "duration": 10,
+        "setup": 0,
+        "startDate": new Date("2021-07-19T11:00:00.000Z"),
+        "endDate": new Date("2021-07-21T12:00:00.000Z"),
+      }]
+
+      expect(wt.getEvents()).toEqual(output)
+    })
+  })
 })

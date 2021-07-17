@@ -69,6 +69,7 @@ class WorkingTimes {
     this.workingTimes = []
     this.currentShift = 0
     this.currentSlot = 0
+    this.holidays = []
   }
 
   setScheduleStartDate(date) {
@@ -78,6 +79,16 @@ class WorkingTimes {
 
   addShift(type) {
     this.shifts.push(shifts[type])
+  }
+
+  addHolidays(holidays) {
+    if (!Array.isArray(holidays) || !holidays.length) {
+      return null
+    }
+
+    holidays.forEach(item => {
+      this.holidays.push(new Date(item ))
+    })
   }
 
   getScheduleStartDate() {
@@ -151,7 +162,14 @@ class WorkingTimes {
   }
 
   getStartDate(setup) {
-    const startDate = this.calculateStartEndDate(setup, this.endDate)
+    let startDateAdjusted = new Date(this.endDate)
+
+    while (this.isHoliday(startDateAdjusted)) {
+      startDateAdjusted.setDate(startDateAdjusted.getDate() + 1)
+      startDateAdjusted = this.calculateStartEndDate(setup, startDateAdjusted)
+    }
+
+    const startDate = this.calculateStartEndDate(setup, startDateAdjusted)
 
     this.startDate = new Date(startDate)
 
@@ -161,9 +179,28 @@ class WorkingTimes {
   getEndDate(duration) {
     const endDate = this.calculateStartEndDate(duration, this.startDate)
 
-    this.endDate = new Date(endDate)
+    let endDateAdjusted = new Date(endDate)
 
-    return endDate
+    while (this.isHoliday(endDateAdjusted)) {
+      endDateAdjusted.setDate(endDateAdjusted.getDate() + 1)
+      endDateAdjusted = this.calculateStartEndDate(0, endDateAdjusted)
+    }
+
+    this.endDate = new Date(endDateAdjusted)
+
+    return endDateAdjusted
+  }
+
+  isHoliday(date) {
+    if (!this.holidays.length || !date) {
+      return false
+    }
+
+    return !!this.holidays.find(holiday =>
+      holiday.getFullYear() === date.getFullYear() &&
+      holiday.getMonth() === date.getMonth() &&
+      holiday.getDate() === date.getDate()
+    )
   }
 
   calculateStartEndDate(duration, date) {

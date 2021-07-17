@@ -9,6 +9,7 @@
 
 	let showLoading = false
 	let orders = []
+	let holidays = []
 	let catalog
 
 	let startDate
@@ -114,6 +115,11 @@
 		loadSchedule(activeTab)
 	}
 
+	function adjustDate(stringDate) {
+		const [year, month, day] = stringDate.split('-')
+    return `${month}/${day}/${year}`
+	}
+
 	function generateSchedule() {
 		if (!catalog) {
 			return alert('Import the catalog first.')
@@ -140,9 +146,14 @@
 		}
 
 		const wt = new WorkingTimes()
-		const [year, month, day] = startDate.split('-')
-    const adjustedDate = `${month}/${day}/${year}`
+    const adjustedDate = adjustDate(startDate)
 		wt.setScheduleStartDate(adjustedDate)
+
+
+		const adjustedHolidays = holidays.map(item => {
+			return adjustDate(item)
+		})
+		wt.addHolidays(adjustedHolidays)
 
 		shiftsSelected.map(index => wt.addShift(index))
 		const response = wt.setWorkingTimes()
@@ -327,10 +338,10 @@
 			<span>Start Date</span> <input type="date" bind:value={startDate}>
 		</p>
 		<p>
-			<span>Holiday 1</span> <input type="date">
+			<span>Holiday 1</span> <input type="date" bind:value={holidays[0]}>
 		</p>
 		<p>
-			<span>Holiday 2</span> <input type="date">
+			<span>Holiday 2</span> <input type="date" bind:value={holidays[1]}>
 		</p>
 		<p>
 			<span>Initial Setup</span> <input type="checkbox" bind:checked={initialSetup}>
