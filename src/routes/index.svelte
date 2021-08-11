@@ -12,10 +12,16 @@
 	let holidays = []
 	let catalog
 
-	let startDate
+	let startDate = []
 	let totalLabourHours = 0
-	let initialSetup = null
-	const shift = [true, false, false, false, false, false]
+	let initialSetup = []
+	let shift = []
+	for(let i = 0; i < 30; i += 1) {
+		shift.push([true, false, false, false, false, false])
+		startDate.push(undefined)
+		holidays.push([undefined, undefined])
+		initialSetup.push(null)
+	}
 
 	let activeTab = 0
 
@@ -76,6 +82,15 @@
 				desiredWantDate: item.desiredWantDate ? new Date(item.desiredWantDate) : '',
 			}))
 		}
+
+		const data = JSON.parse(localStorage.getItem(`schedule_${activeTab}_config`) || '{}');
+		
+		if (data.shift) {
+			shift = data.shift
+			startDate = data.startDate
+			holidays = data.holidays
+			initialSetup = data.initialSetup
+		}
 	}
 
 	async function fileHandler(event) {
@@ -102,6 +117,12 @@
 
 	function saveHandler(event) {
 		localStorage.setItem(`schedule_${activeTab}`, JSON.stringify(orders));
+		localStorage.setItem(`schedule_${activeTab}_config`, JSON.stringify({
+			shift,
+			startDate,
+			holidays,
+			initialSetup,
+		}));
 
 		alert('Schedule saved')
 	}
@@ -125,15 +146,15 @@
 			return alert('Import the catalog first.')
 		}
 
-		if (shift.length === 0) {
+		if (shift[activeTab].length === 0) {
 			return alert('Please select at least one shift.')
 		}
 
-		if (!startDate) {
+		if (!startDate[activeTab]) {
 			return alert('Please set a Start Date')
 		}
 
-		const shiftsSelected = shift.reduce((accu, item, index) => {
+		const shiftsSelected = shift[activeTab].reduce((accu, item, index) => {
 			if (item) {
 				accu.push(index)
 			}
@@ -146,12 +167,12 @@
 		}
 
 		const wt = new WorkingTimes()
-    const adjustedDate = adjustDate(startDate)
+    const adjustedDate = adjustDate(startDate[activeTab])
 		wt.setScheduleStartDate(adjustedDate)
 
 
-		const adjustedHolidays = holidays.map(item => {
-			return adjustDate(item)
+		const adjustedHolidays = holidays[activeTab].map(item => {
+			return item && adjustDate(item)
 		})
 		wt.addHolidays(adjustedHolidays)
 
@@ -174,14 +195,14 @@
 			order.duration = duration > 0 ? duration : 0
 			order.laborHours = order.quantity * part.hrsByPiece
 
-			const setup = index > 0 || initialSetup ? part.setup : 0
+			const setup = index > 0 || initialSetup[activeTab] ? part.setup : 0
 
-			const { startDate, endDate }  = wt.addEvent({
+			const { startDate: startDateEvent, endDate }  = wt.addEvent({
 				duration,
 				setup,
 			})
 
-			order.desiredRIsDate = startDate
+			order.desiredRIsDate = startDateEvent
 			order.desiredWantDate = endDate
 			order.setup = setup
 			
@@ -323,7 +344,7 @@
 		{#each shiftsData as _, index}
 			<p>
 				<span>{shiftsData[index].title}</span>
-				<input type="checkbox" bind:checked={shift[index]} value={index+1}> 
+				<input type="checkbox" bind:checked={shift[activeTab][index]} value={index+1}> 
 			</p>
 		{/each}
 	</div>
@@ -335,16 +356,16 @@
 			<label for="file">Select file</label>
 		</p>
 		<p>
-			<span>Start Date</span> <input type="date" bind:value={startDate}>
+			<span>Start Date</span> <input type="date" bind:value={startDate[activeTab]}>
 		</p>
 		<p>
-			<span>Holiday 1</span> <input type="date" bind:value={holidays[0]}>
+			<span>Holiday 1</span> <input type="date" bind:value={holidays[activeTab][0]}>
 		</p>
 		<p>
-			<span>Holiday 2</span> <input type="date" bind:value={holidays[1]}>
+			<span>Holiday 2</span> <input type="date" bind:value={holidays[activeTab][1]}>
 		</p>
 		<p>
-			<span>Initial Setup</span> <input type="checkbox" bind:checked={initialSetup}>
+			<span>Initial Setup</span> <input type="checkbox" bind:checked={initialSetup[activeTab]}>
 		</p>
 		<p>
 			<span>Total Labour Hours</span> {totalLabourHours.toFixed(2)}
