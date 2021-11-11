@@ -241,6 +241,10 @@ class WorkingTimes {
 
         startDate.setDate(startDate.getDate() + isNextDay)
 
+        while (this.isHoliday(startDate)) {
+          startDate.setDate(startDate.getDate() + 1)
+        }
+
         endSlot = getEndSlot(startDate, endTime)
         if (endSlot < startDate) {
           endSlot.setDate(endSlot.getDate() + 1)

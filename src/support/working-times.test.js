@@ -475,4 +475,41 @@ describe('working-times', () => {
       expect(wt.getEvents()).toEqual(output)
     })
   })
+
+  describe('https://trello.com/c/eeqQPtWC', () => {
+    it('does not include holiday', () => {
+      const startDate = '11/09/2021'
+      const holidays = ['11/15/2021']
+
+      const wt = new WorkingTimes()
+      wt.setScheduleStartDate(startDate)
+      wt.addShift(0)
+      wt.addHolidays(holidays)
+      wt.setWorkingTimes()
+
+      const events = [{
+        duration: 35.56,
+        setup: 0
+      }, {
+        duration: 20.57,
+        setup: 1.3
+      }]
+
+      events.forEach((event) => wt.addEvent(event))
+
+      const output = [{
+        "duration": 35.56,
+        "setup": 0,
+        "startDate": new Date("2021-11-09T12:00:00.000Z"),
+        "endDate": new Date("2021-11-12T21:33:00.000Z"),
+      }, {
+        "duration": 20.57,
+        "setup": 1.3,
+        "startDate": new Date("2021-11-16T12:51:00.000Z"),
+        "endDate": new Date("2021-11-18T15:25:00.000Z"),
+      }]
+
+      expect(wt.getEvents()).toEqual(output)
+    })
+  })
 })
