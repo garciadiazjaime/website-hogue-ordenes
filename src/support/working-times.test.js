@@ -1,4 +1,4 @@
-import WorkingTimes from './working-times'
+import WorkingTimes, { getOrders } from './working-times'
 
 describe('working-times', () => {
 
@@ -512,4 +512,53 @@ describe('working-times', () => {
       expect(wt.getEvents()).toEqual(output)
     })
   })
+
+  describe("https://trello.com/c/nT46mxb0", () => {
+    describe("when `order.quantity / part.piecesByHour` is less than overtime", () => {
+      it("calls `addEvent` with orders.laborHours", () => {
+        const catalog = {
+          "05201": {
+            hrsByPiece: 0.03125,
+            id: "05201",
+            piecesByHour: "32",
+            setup: 1.3,
+          },
+        };
+
+        const orders = [
+          {
+            overtime: "1",
+            partId: "05201",
+            quantity: 25,
+            setup: 1.3,
+          },
+        ];
+        const initialSetup = [];
+        const wt = {
+          addEvent: jest.fn(() => ({
+            startDate: "startDate",
+            endDate: "endDate",
+          })),
+        };
+        const response = getOrders(orders, catalog, wt, initialSetup);
+
+        expect(wt.addEvent).toHaveBeenCalledWith({
+          duration: 0.78125,
+          setup: 0,
+        });
+        expect(response).toEqual([
+          {
+            desiredRIsDate: "startDate",
+            desiredWantDate: "endDate",
+            duration: 0.78125,
+            laborHours: 0.78125,
+            overtime: "1",
+            partId: "05201",
+            quantity: 25,
+            setup: 0,
+          },
+        ]);
+      });
+    });
+  });
 })

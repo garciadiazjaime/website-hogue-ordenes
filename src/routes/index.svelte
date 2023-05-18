@@ -3,7 +3,7 @@
 	import readXlsxFile from 'read-excel-file'
 
 	import { shifts as shiftsData } from '../support/shifts'
-	import WorkingTimes from '../support/working-times'
+	import WorkingTimes, { getOrders } from '../support/working-times'
 	import { exportCSVFile, csvJSON } from '../support/csv'
 	import Loading from '../components/Loading.svelte'
 
@@ -167,7 +167,7 @@
 		}
 
 		const wt = new WorkingTimes()
-    const adjustedDate = adjustDate(startDate[activeTab])
+    	const adjustedDate = adjustDate(startDate[activeTab])
 		wt.setScheduleStartDate(adjustedDate)
 
 
@@ -182,32 +182,7 @@
 			return
 		}
 
-		orders = orders.map((order, index) => {
-			const part = catalog[order.partId] || {}
-
-			if (!part || !part.piecesByHour) {
-				order.missingPart = true
-				part.piecesByHour = Infinity
-			}
-
-			const overtime = Number.isInteger(parseInt(order.overtime)) ? order.overtime : 0
-			const duration = (order.quantity / part.piecesByHour) - overtime
-			order.duration = duration > 0 ? duration : 0
-			order.laborHours = order.quantity * part.hrsByPiece
-
-			const setup = index > 0 || initialSetup[activeTab] ? part.setup : 0
-
-			const { startDate: startDateEvent, endDate }  = wt.addEvent({
-				duration,
-				setup,
-			})
-
-			order.desiredRIsDate = startDateEvent
-			order.desiredWantDate = endDate
-			order.setup = setup
-			
-			return order
-		})
+		orders = getOrders(orders, catalog, wt, initialSetup, activeTab)
 	}
 
 	function updateLabourHours() {

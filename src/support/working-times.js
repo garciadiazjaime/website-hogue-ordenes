@@ -59,6 +59,35 @@ function adjustNextDayWhenSunday(startDate, isNextDay) {
   return isNextDay
 }
 
+export const getOrders = (orders, catalog, wt, initialSetup, activeTab) => {
+  return orders.map((order, index) => {
+    const part = catalog[order.partId] || {}
+
+    if (!part || !part.piecesByHour) {
+      order.missingPart = true
+      part.piecesByHour = Infinity
+    }
+    const overtime = Number.isInteger(parseInt(order.overtime)) ? order.overtime : 0
+    const quantityCoverPerHour = order.quantity / part.piecesByHour
+    const duration = quantityCoverPerHour - overtime > 0 ? quantityCoverPerHour - overtime : quantityCoverPerHour
+    order.duration = duration > 0 ? duration : 0
+    order.laborHours = order.quantity * part.hrsByPiece
+
+    const setup = index > 0 || initialSetup[activeTab] ? part.setup : 0
+
+    const { startDate: startDateEvent, endDate }  = wt.addEvent({
+      duration,
+      setup,
+    })
+
+    order.desiredRIsDate = startDateEvent
+    order.desiredWantDate = endDate
+    order.setup = setup
+    
+    return order
+  })
+}
+
 class WorkingTimes {
   constructor() {
     this.scheduleStartDate = null
