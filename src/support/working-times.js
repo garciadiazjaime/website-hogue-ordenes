@@ -150,6 +150,16 @@ class WorkingTimes {
     return [nextSlot, isNextDay];
   }
 
+  moveSlotTillNextDay() {
+    let [, isNextDay] = this.getNextSlot();
+
+    while (!isNextDay) {
+      [, isNextDay] = this.getNextSlot();
+    }
+
+    return isNextDay;
+  }
+
   setWorkingTimes() {
     const workingTimes = [];
     const workDays = getWorkDays(this.getScheduleStartDate());
@@ -187,7 +197,6 @@ class WorkingTimes {
       `${this.scheduleStartDate} ${this.workingTimes[this.currentSlot][1]}`
     );
     this.endDate = new Date(this.startDate);
-    this.currentDay = this.currentSlot[0];
 
     return true;
   }
@@ -276,7 +285,8 @@ class WorkingTimes {
         startDate.setDate(startDate.getDate() + isNextDay);
 
         while (this.isHoliday(startDate)) {
-          startDate.setDate(startDate.getDate() + 1);
+          isNextDay = this.moveSlotTillNextDay();
+          startDate.setDate(startDate.getDate() + isNextDay);
         }
 
         endSlot = getEndSlot(startDate, endTime);

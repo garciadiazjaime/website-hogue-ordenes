@@ -620,4 +620,43 @@ describe("working-times", () => {
       });
     });
   });
+
+  describe("https://www.notion.so/Desired-Want-Date-Error-7e73f10652ed493c896864b14b99ac87?pvs=4", () => {
+    describe("when a holiday is set", () => {
+      it("should move slot till next day", () => {
+        const startDateMonday = "04/15/2024";
+        const holidaysFriday = ["04/19/2024"];
+
+        const wt = new WorkingTimes();
+        wt.setScheduleStartDate(startDateMonday);
+        wt.addShift(0);
+        wt.addHolidays(holidaysFriday);
+        wt.setWorkingTimes();
+
+        const events = [
+          {
+            duration: 40,
+            setup: 0,
+          },
+        ];
+
+        events.forEach((event) => wt.addEvent(event));
+        const mondayThursday36HoursPlusNextMonday4Hours = new Date(
+          "2024-04-22T15:00:00.000Z"
+        );
+
+        const monday = new Date("2024-04-15T11:00:00.000Z");
+        const output = [
+          {
+            duration: 40,
+            setup: 0,
+            startDate: monday,
+            endDate: mondayThursday36HoursPlusNextMonday4Hours,
+          },
+        ];
+
+        expect(wt.getEvents()).toEqual(output);
+      });
+    });
+  });
 });
